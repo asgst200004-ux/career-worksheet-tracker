@@ -220,11 +220,12 @@ def update_progress(data, sid, name=None, sess_no=None, submitted=None, level=No
 
 
 def write_progress_sheet(wb, data, title: str, n_sess: int = PROGRESS_N_SESS,
-                         summary_sheet_name: str = SUMMARY_SHEET_NAME):
+                         summary_sheet_name: str = SUMMARY_SHEET_NAME, label: str = "P"):
     """
     진행 확인표 시트를 data로 새로 그린다(기존 시트는 지우고 다시 만듦 → 새 학생 추가·정렬도 자동).
     title 예: '2026학년도 1학년 12반 진로 프로젝트 진행 확인표'
     시트 순서는 학생 시트들 → 진행 확인표 → 요약 시트(맨 끝).
+    label: 차시 머리글 접두어. 기존 파일이 'p-1'처럼 소문자를 쓰면 label="p".
     """
     from openpyxl.styles import Font as _F, Alignment as _A, PatternFill as _P
     if PROGRESS_SHEET_NAME in wb.sheetnames:
@@ -248,7 +249,7 @@ def write_progress_sheet(wb, data, title: str, n_sess: int = PROGRESS_N_SESS,
     for i in range(n_sess):
         col = fc + 2 * i
         ws.merge_cells(start_row=4, start_column=col, end_row=4, end_column=col + 1)
-        ws.cell(4, col, f"P-{i+1}")
+        ws.cell(4, col, f"{label}-{i+1}")
         ws.cell(5, col, "제출"); ws.cell(5, col + 1, "기록")
     for col, h in [(cnt_col, "제출\n차시 수"), (hi_col, "'상'\n차시 수"),
                    (note_col, "간단기록(차시별 흐름 · 지도 포인트)")]:
