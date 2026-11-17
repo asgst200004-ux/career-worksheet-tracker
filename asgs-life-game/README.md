@@ -32,3 +32,5 @@
 배경 그림(`bg-*`): 교문 봄·여름·가을·겨울, 교실 봄·여름·가을·겨울, 강당(현수막 글자는 게임에서 올림), 실습실, 밤 책상, 진로 상담실, 운동장, 축제. 모든 장면이 그림 파일로 바뀌었습니다. 새 배경을 넣을 때는 `index.html`의 `SCENE_IMG` 목록에 추가합니다.
 
 선택지 그림(`opt-*`): 분야 6장(hum, sci, med, biz, edu, art), 졸업 후의 길 3장(college, job, undecided), 입시 전형 3장(jonghap, gyogwa, jeongsi), 직업 가치관 8장(v0~v7). `index.html`의 `OPT_IMG` 목록에서 연결합니다.
+
+친구 그림: 민재(`minjae-*`), 서연(`seoyeon-*`), 지우(`jiwoo-*`) 각 기본(smile)·기쁨(happy). 기쁨 표정은 졸업 화면에서 우정이 깊을 때 나옵니다. 친구 이야기는 `index.html`의 `FRV` 목록, 친구 졸업 진로는 `friendEnd()`에 있습니다.
