@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>ASGS 고교 3년</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 /* 구성: 위에는 칠판(상태판), 아래에는 시험지 한 장. 선택지는 객관식 보기 ①②③, 결과는 빨간펜으로 표시한다. */
 :root{
@@ -13,8 +13,8 @@
   --board:#1F4338; --board-hi:#2F5A4C; --chalk:#F2F5EB; --chalk-dim:#A9C0B3; --wood:#9B6B3D;
   --hl:#FFE169; --hl-ink:#33290A; --red:#C93A20; --good:#1B7548;
   --av-bg:#D7E5DC; --id1:#BFDCF2; --id2:#EAF4FB; --sticker:#FFFFFF; --shade:rgba(10,20,16,.3);
-  --f-display:'Gaegu','Nanum Pen Script','Apple SD Gothic Neo','Malgun Gothic',cursive;
-  --f-body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
+  --f-display:'Jua','Apple SD Gothic Neo','Malgun Gothic',sans-serif;
+  --f-body:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){
@@ -32,6 +32,7 @@
   --av-bg:#2A4238; --id1:#2B4A63; --id2:#3F6079; --sticker:#FFFFFF; --shade:rgba(0,0,0,.5); color-scheme:dark;
 }
 *{box-sizing:border-box}
+[class*="bb-"],.qn,.circ,.stamp,.hud-id b,.cn,.tl,.big,.diploma h1,.modal-hd h2,.hall-t,.pole b,.how li::before,.seal{font-weight:400!important}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;
   -webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere;
   background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
