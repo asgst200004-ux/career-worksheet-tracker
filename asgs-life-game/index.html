@@ -12,7 +12,7 @@
   --paper:#EDF1EA; --grid:#DFE6DD; --sheet:#FFFFFF; --ink:#1C2826; --muted:#586964; --line:#C9D4CC;
   --board:#1F4338; --board-hi:#2F5A4C; --chalk:#F2F5EB; --chalk-dim:#A9C0B3; --wood:#9B6B3D;
   --hl:#FFE169; --hl-ink:#33290A; --red:#C93A20; --good:#1B7548;
-  --av-bg:#D7E5DC; --av-uni:#2D466A;
+  --av-bg:#D7E5DC; --id1:#BFDCF2; --id2:#EAF4FB; --sticker:#FFFFFF; --shade:rgba(10,20,16,.3);
   --f-display:'Gaegu','Nanum Pen Script','Apple SD Gothic Neo','Malgun Gothic',cursive;
   --f-body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -22,14 +22,14 @@
     --paper:#101B17; --grid:#162520; --sheet:#1A2A24; --ink:#EBEFE3; --muted:#9DB0A5; --line:#2F463D;
     --board:#0B1512; --board-hi:#22382F; --chalk:#F2F5EB; --chalk-dim:#8FA79A; --wood:#6B4A2A;
     --hl:#FFE169; --hl-ink:#33290A; --red:#FF8D73; --good:#72D6A3;
-    --av-bg:#2A4238; --av-uni:#4B6C9E; color-scheme:dark;
+    --av-bg:#2A4238; --id1:#2B4A63; --id2:#3F6079; --sticker:#FFFFFF; --shade:rgba(0,0,0,.5); color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#101B17; --grid:#162520; --sheet:#1A2A24; --ink:#EBEFE3; --muted:#9DB0A5; --line:#2F463D;
   --board:#0B1512; --board-hi:#22382F; --chalk:#F2F5EB; --chalk-dim:#8FA79A; --wood:#6B4A2A;
   --hl:#FFE169; --hl-ink:#33290A; --red:#FF8D73; --good:#72D6A3;
-  --av-bg:#2A4238; --av-uni:#4B6C9E; color-scheme:dark;
+  --av-bg:#2A4238; --id1:#2B4A63; --id2:#3F6079; --sticker:#FFFFFF; --shade:rgba(0,0,0,.5); color-scheme:dark;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;
@@ -133,11 +133,26 @@ i{font-style:normal}
 .apps li.no b{color:var(--muted);font-weight:500}
 .apps small{flex-basis:100%;font-size:12px;color:var(--muted)}
 
+/* 그림 */
+.scene{display:block}
+.scn{position:relative;margin:-18px -16px 0;aspect-ratio:20/9;overflow:hidden;border-radius:2px 2px 0 0;background:var(--grid)}
+.scn.solo{margin:0;border:1px solid var(--line);border-radius:3px}
+.scn .scene,.kv .scene{position:absolute;inset:0;width:100%;height:100%}
+.who{position:absolute;aspect-ratio:240/300;width:auto;filter:drop-shadow(1.5px 0 0 var(--sticker)) drop-shadow(-1.5px 0 0 var(--sticker)) drop-shadow(0 -1.5px 0 var(--sticker)) drop-shadow(0 4px 6px var(--shade))}
+.scn .who{right:4%;bottom:-10%;height:106%}
+.hero{display:flex;flex-direction:column}
+.kv{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:4px 4px 0 0;margin-bottom:-10px;background:var(--grid)}
+.kv .who{bottom:-3%;height:80%}
+.kv .who.l{left:5%} .kv .who.r{right:5%}
+.hero .bb{position:relative}
+.idp{display:block;width:100%;max-width:132px;aspect-ratio:1/1.12;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:linear-gradient(var(--id1),var(--id2))}
+.idp svg{display:block;width:100%;height:auto;margin-top:6%}
+
 /* 상태판 */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--board);color:var(--chalk);border-bottom:6px solid var(--wood)}
 .hud-in{max-width:560px;margin:0 auto;padding-block:9px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
 .hud-top{display:flex;align-items:center;gap:10px}
-.hud-av{flex:none;display:flex}
+.hud-av{flex:none;display:flex;width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--av-bg)}
 .hud-id{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .hud-id b{font-family:var(--f-display);font-size:21px;font-weight:700}
 .hud-id span{font-size:12.5px;color:var(--chalk-dim)}
@@ -722,18 +737,359 @@ function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return null
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 
 /* ---------- 화면 ---------- */
-function avatar(c,sz){
-  const hairBack=c==='f'?'<path d="M16 30c0-12 7-19 16-19s16 7 16 19v11c0 3-2 5-5 5H21c-3 0-5-2-5-5z" fill="#3A2A22"/>':'';
-  const hair=c==='f'?'<path d="M18.5 28c1-10 6-15.5 13.5-15.5S44.500 18 45.500 28c-5.500 0-10.500-2.500-13.500-6.500C29 25.500 24 28 18.500 28z" fill="#3A2A22"/>'
-    :'<path d="M18.5 27c0-10 6-16.500 13.500-16.500S45.500 17 45.500 27c-3.500-1-6.500-3-8.500-6-4.500 4-10.500 6-18.500 6z" fill="#2A211D"/>';
-  return'<svg viewBox="0 0 64 64" width="'+sz+'" height="'+sz+'" aria-hidden="true"><defs><clipPath id="avc"><circle cx="32" cy="32" r="32"/></clipPath></defs><g clip-path="url(#avc)">'
-    +'<rect width="64" height="64" fill="var(--av-bg)"/>'+hairBack
-    +'<path d="M9 66c0-14 10-21 23-21s23 7 23 21z" fill="var(--av-uni)"/><rect x="28" y="38" width="8" height="9" fill="#EBC3A3"/>'
-    +'<path d="M25 44.500l7 8 7-8z" fill="#fff"/><path d="M32 51l-2.500 7h5z" fill="#C93A20"/>'
-    +'<circle cx="32" cy="28" r="13" fill="#F3CFB2"/>'+hair
-    +'<circle cx="27" cy="30.500" r="1.600" fill="#2A211D"/><circle cx="37" cy="30.500" r="1.600" fill="#2A211D"/>'
-    +'<path d="M28.500 35.500q3.500 2.600 7 0" fill="none" stroke="#2A211D" stroke-width="1.500" stroke-linecap="round"/></g></svg>';
+/* ---------- 그림: 인물과 배경 ---------- */
+function prng(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+let artUid=0;
+
+/* --- character bust --- viewBox 240x300 */
+function chara(c,o){
+  o=o||{};const ex=o.ex||'smile',u='c'+(artUid++),girl=c==='f';
+  const H=girl?{d:'#3F2B24',m:'#5C4034',l:'#946D58'}:{d:'#1F1B1B',m:'#34302F',l:'#625853'};
+  const SK='#FCE4D2',SKS='#F2C3A8',LINE='#33241F',iris=girl?['#4A2A1C','#C98A4B']:['#23222E','#7C7AA0'];
+  const FACE='M62 106 C62 60 178 60 178 106 C178 142 152 170 120 174 C88 170 62 142 62 106Z';
+  function eye(cx,out){
+    const y=122;
+    if(ex==='happy')return'<path d="M'+(cx-13)+' '+(y+2)+' Q'+cx+' '+(y-13)+' '+(cx+13)+' '+(y+2)+'" fill="none" stroke="'+LINE+'" stroke-width="3.800" stroke-linecap="round"/>';
+    const lid=ex==='tired'?7:0,ox=cx+out*14;
+    return'<clipPath id="'+u+'e'+cx+'"><path d="M'+(cx-14)+' '+(y-2+lid)+' Q'+cx+' '+(y-17+lid)+' '+(cx+14)+' '+(y-2+lid)+' L'+(cx+14)+' '+(y+18)+' L'+(cx-14)+' '+(y+18)+'Z"/></clipPath>'
+      +'<ellipse cx="'+cx+'" cy="'+(y+1)+'" rx="13" ry="14" fill="#fff"/>'
+      +'<g clip-path="url(#'+u+'e'+cx+')"><ellipse cx="'+cx+'" cy="'+(y+2)+'" rx="9.800" ry="12.200" fill="url(#'+u+'ir)"/><ellipse cx="'+cx+'" cy="'+(y+3)+'" rx="4.400" ry="6.200" fill="#150F0F"/>'
+      +'<path d="M'+(cx-10)+' '+(y-6)+' h20 v-8 h-20Z" fill="#000" opacity=".22"/>'
+      +'<circle cx="'+(cx-3.600)+'" cy="'+(y-3)+'" r="3.400" fill="#fff"/><circle cx="'+(cx+4)+'" cy="'+(y+8)+'" r="1.700" fill="#fff" opacity=".9"/></g>'
+      +'<path d="M'+(cx-14.500)+' '+(y-2+lid)+' Q'+cx+' '+(y-17.500+lid)+' '+(cx+14.500)+' '+(y-2+lid)+'" fill="none" stroke="'+LINE+'" stroke-width="3.800" stroke-linecap="round"/>'
+      +'<path d="M'+ox+' '+(y-3+lid)+' l'+(out*4.500)+' -3.500" stroke="'+LINE+'" stroke-width="2.600" stroke-linecap="round"/>'
+      +'<path d="M'+(cx-9)+' '+(y-19+lid)+' Q'+cx+' '+(y-23+lid)+' '+(cx+9)+' '+(y-19+lid)+'" fill="none" stroke="'+SKS+'" stroke-width="1.600" stroke-linecap="round"/>'
+      +(ex==='tired'?'<path d="M'+(cx-9)+' '+(y+19)+' Q'+cx+' '+(y+22)+' '+(cx+9)+' '+(y+19)+'" fill="none" stroke="#C59483" stroke-width="1.800" stroke-linecap="round"/>':'');
+  }
+  const sad=ex==='tired'||ex==='worry';
+  const brow='<path d="M'+(sad?'83 103 Q95 98 108 104':'82 103 Q95 95 108 100')+'" fill="none" stroke="'+H.d+'" stroke-width="3" stroke-linecap="round"/><path d="M'+(sad?'157 103 Q145 98 132 104':'158 103 Q145 95 132 100')+'" fill="none" stroke="'+H.d+'" stroke-width="3" stroke-linecap="round"/>';
+  const mouth=ex==='happy'?'<path d="M107 150 Q120 170 133 150 Q120 154 107 150Z" fill="#B9443F"/><path d="M110.500 151.500 Q120 155.500 129.500 151.500" fill="none" stroke="#fff" stroke-width="2.400" stroke-linecap="round"/><path d="M114 161 Q120 165 126 161" fill="none" stroke="#E98A82" stroke-width="2.600" stroke-linecap="round"/>'
+    :ex==='tired'?'<path d="M112 157 Q120 154 128 157" fill="none" stroke="#A84C44" stroke-width="2.600" stroke-linecap="round"/>'
+    :ex==='worry'?'<path d="M111 158 Q120 151 129 158" fill="none" stroke="#A84C44" stroke-width="2.600" stroke-linecap="round"/>'
+    :'<path d="M108 152 Q120 163 132 152" fill="none" stroke="#A84C44" stroke-width="2.800" stroke-linecap="round"/>';
+  const hairBack=girl
+    ?'<path d="M52 112 C44 40 196 40 188 112 C192 150 202 198 192 228 C178 240 162 234 158 214 L82 214 C78 234 62 240 48 228 C38 198 48 150 52 112Z" fill="'+H.d+'"/>'
+    :'<path d="M60 112 C54 58 186 58 180 112 L176 134 L64 134Z" fill="'+H.d+'"/>';
+  const frontD=girl
+    ?['M58 120 C50 62 90 38 122 38 C162 38 192 64 182 120 C178 100 172 90 164 82 C152 98 136 106 116 107 C122 100 126 92 127 86 C112 100 92 108 72 108 C66 112 61 118 58 128Z',
+      'M60 108 C53 138 55 172 66 194 C73 168 72 134 77 110Z','M180 108 C187 138 185 172 174 194 C167 168 168 134 165 110Z']
+    :['M60 114 C50 58 96 34 124 34 C164 34 192 62 180 114 C178 100 174 92 168 86 C162 96 152 102 142 104 C146 98 148 92 148 86 C136 100 118 106 100 106 C104 100 106 94 106 90 C94 102 80 106 68 106 C64 108 61 110 60 114Z',
+      'M60 110 C57 122 60 132 65 140 L69 112Z','M180 110 C183 122 180 132 175 140 L171 112Z'];
+  const hairFront=frontD.map(d=>'<path d="'+d+'" fill="'+H.m+'"/>').join('')
+    +(girl?'<path d="M80 68 Q120 46 162 70" fill="none" stroke="'+H.l+'" stroke-width="5" stroke-linecap="round" opacity=".55"/><path d="M100 58 Q98 84 86 104 M142 56 Q152 74 162 82" fill="none" stroke="'+H.d+'" stroke-width="1.600" opacity=".55"/><path d="M64 150 Q62 170 67 186 M176 150 Q178 170 173 186" fill="none" stroke="'+H.l+'" stroke-width="2" opacity=".5" stroke-linecap="round"/>'
+      :'<path d="M84 60 Q122 40 160 62" fill="none" stroke="'+H.l+'" stroke-width="5" stroke-linecap="round" opacity=".5"/><path d="M112 52 Q112 80 102 100 M140 50 Q148 70 146 84" fill="none" stroke="'+H.d+'" stroke-width="1.600" opacity=".6"/>');
+  const neckwear=girl
+    ?'<path d="M120 214 L98 202 L98 228Z" fill="#C8403A"/><path d="M120 214 L142 202 L142 228Z" fill="#C8403A"/><path d="M120 214 L98 214 L98 228Z" fill="#A6302C"/><path d="M120 214 L142 214 L142 228Z" fill="#A6302C"/><rect x="114.500" y="207" width="11" height="14" rx="3.500" fill="#DB5A52"/><path d="M116 221 L109 244 L120 236 L131 244 L124 221Z" fill="#C8403A"/>'
+    :'<path d="M113 207 L127 207 L130 218 L120 225 L110 218Z" fill="#A6302C"/><path d="M112 221 L120 225 L128 221 L132 266 L120 280 L108 266Z" fill="#C8403A"/><path d="M120 225 L128 221 L132 266 L120 280Z" fill="#A6302C" opacity=".55"/>';
+  const extra=ex==='tired'?'<path d="M180 92 q7 11 0 16 q-7 -5 0 -16Z" fill="#9FD0F0"/>':(ex==='happy'?'<path d="M40 70 l3 8 l8 3 l-8 3 l-3 8 l-3 -8 l-8 -3 l8 -3Z" fill="#FFD25E"/><path d="M204 96 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 l5 -2Z" fill="#FFD25E"/>':'');
+  return'<svg viewBox="'+(o.face?'42 28 156 156':'0 0 240 300')+'" '+(o.cls?'class="'+o.cls+'" ':'')+(o.w?'width="'+o.w+'" height="'+(o.h||o.w)+'" ':'')+'aria-hidden="true">'
+    +'<defs><linearGradient id="'+u+'ir" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+iris[0]+'"/><stop offset="1" stop-color="'+iris[1]+'"/></linearGradient>'
+    +'<linearGradient id="'+u+'bz" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A5187"/><stop offset="1" stop-color="#22325A"/></linearGradient>'
+    +'<linearGradient id="'+u+'sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FDEBDD"/><stop offset="1" stop-color="'+SK+'"/></linearGradient>'
+    +'<clipPath id="'+u+'fc"><path d="'+FACE+'"/></clipPath></defs>'
+    +hairBack
+    +'<path d="M20 300 C22 240 60 212 102 200 L138 200 C180 212 218 240 220 300Z" fill="url(#'+u+'bz)"/>'
+    +'<path d="M34 268 C46 236 72 220 100 208" fill="none" stroke="#5A74B4" stroke-width="3" stroke-linecap="round" opacity=".55"/><path d="M206 268 C194 236 168 220 140 208" fill="none" stroke="#5A74B4" stroke-width="3" stroke-linecap="round" opacity=".35"/>'
+    +'<path d="M100 198 L120 252 L140 198Z" fill="#fff"/>'
+    +'<path d="M104 164 L104 200 Q120 214 136 200 L136 164Z" fill="'+SK+'"/><path d="M104 168 Q120 192 136 168 L136 180 Q120 200 104 180Z" fill="'+SKS+'"/>'
+    +'<path d="M100 196 L91 208 L112 223 L120 210Z" fill="#fff" stroke="#D5DCEA" stroke-width="1.200"/><path d="M140 196 L149 208 L128 223 L120 210Z" fill="#fff" stroke="#D5DCEA" stroke-width="1.200"/>'
+    +neckwear
+    +'<path d="M100 200 L68 214 L104 292 L120 252Z" fill="#2C3F6C"/><path d="M140 200 L172 214 L136 292 L120 252Z" fill="#2C3F6C"/>'
+    +'<path d="M68 214 L104 292 M172 214 L136 292" stroke="#18254A" stroke-width="1.800" fill="none"/><path d="M82 220 L104 268" stroke="#4A62A0" stroke-width="1.500" opacity=".6"/>'
+    +'<path d="M150 246 h17 v10 q-8.500 11 -17 0Z" fill="#E8B94A"/><path d="M154 250 h9 v5 q-4.500 6 -9 0Z" fill="#2F5446"/>'
+    +'<ellipse cx="62" cy="124" rx="8" ry="12" fill="'+SKS+'"/><ellipse cx="178" cy="124" rx="8" ry="12" fill="'+SKS+'"/>'
+    +'<path d="'+FACE+'" fill="url(#'+u+'sk)"/>'
+    +'<g clip-path="url(#'+u+'fc)" transform="translate(0 7)" opacity=".5">'+frontD.map(d=>'<path d="'+d+'" fill="#E9A98C"/>').join('')+'</g>'
+    +'<ellipse cx="85" cy="143" rx="11" ry="6" fill="#F58E82" opacity=".36"/><ellipse cx="155" cy="143" rx="11" ry="6" fill="#F58E82" opacity=".36"/>'
+    +eye(96,-1)+eye(144,1)+brow
+    +'<path d="M120 138 q2.500 4 -1 6" fill="none" stroke="#D99A7E" stroke-width="1.800" stroke-linecap="round"/>'
+    +mouth+hairFront+extra+'</svg>';
 }
+/* --- scenes --- viewBox 800x360 */
+const SEA={
+  spring:{sky:['#7FBDEF','#CFE8FA','#FBE4EC'],fol:['#DE7FA2','#F1A6BF','#F9C9D8','#FFEAF0'],lawn:['#B5D99A','#93C47A'],part:'#F8BFD1',hill:['#BFDCC6','#A3CBAE'],glow:'#FFF3D6'},
+  summer:{sky:['#2F86DD','#7DBBF1','#D6EEFB'],fol:['#256E46','#3E935A','#68B866','#A2D987'],lawn:['#86C96F','#62AB55'],part:null,hill:['#86BE92','#63A377'],glow:'#FFFBE6'},
+  autumn:{sky:['#EE9A52','#F7C886','#FCEACB'],fol:['#B9541B','#DD8425','#F2B037','#FAD667'],lawn:['#CDB872','#B59C55'],part:'#F0AE35',hill:['#DDBE90','#C8A273'],glow:'#FFEEC2'},
+  winter:{sky:['#8FABCF','#C3D4E8','#EEF3F9'],fol:['#C5D3E3','#DDE7F1','#F1F6FB','#FFFFFF'],lawn:['#F6F9FD','#E4ECF5'],part:'#FFFFFF',hill:['#D8E2EE','#C2D0E0'],glow:'#FFFFFF'}
+};
+function sOpen(u,label,defs){
+  return'<svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid slice" class="scene" role="img" aria-label="'+label+'"><defs>'
+    +'<filter id="'+u+'b" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.200"/></filter>'
+    +'<filter id="'+u+'B" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>'
+    +(defs||'')+'</defs>';
+}
+function sClose(u,warm){
+  return'<rect width="800" height="360" fill="url(#'+u+'v)"/></svg>';
+}
+function lg(id,stops,x2,y2){return'<linearGradient id="'+id+'" x1="0" y1="0" x2="'+(x2||0)+'" y2="'+(y2==null?1:y2)+'">'+stops.map((c,i)=>'<stop offset="'+(i/(stops.length-1))+'" stop-color="'+c+'"/>').join('')+'</linearGradient>';}
+function vig(u,c){return'<radialGradient id="'+u+'v" cx=".5" cy=".42" r=".8"><stop offset=".55" stop-color="'+(c||'#1A2430')+'" stop-opacity="0"/><stop offset="1" stop-color="'+(c||'#1A2430')+'" stop-opacity=".34"/></radialGradient>';}
+function clouds(R,n,y0,y1,op){let h='';for(let i=0;i<n;i++){const x=R()*860-30,y=y0+R()*(y1-y0),w=50+R()*70;h+='<g opacity="'+(op||.9)+'"><ellipse cx="'+x+'" cy="'+y+'" rx="'+w+'" ry="'+w*.24+'" fill="#fff"/><ellipse cx="'+(x-w*.3)+'" cy="'+(y-w*.14)+'" rx="'+w*.4+'" ry="'+w*.24+'" fill="#fff"/><ellipse cx="'+(x+w*.25)+'" cy="'+(y-w*.2)+'" rx="'+w*.45+'" ry="'+w*.3+'" fill="#fff"/></g>';}return h;}
+function tree(R,x,y,s,pal,winter){
+  let h='<path d="M'+(x-10*s)+' '+y+' C'+(x-5*s)+' '+(y-60*s)+' '+(x-9*s)+' '+(y-110*s)+' '+(x-3*s)+' '+(y-170*s)+' L'+(x+4*s)+' '+(y-170*s)+' C'+(x+9*s)+' '+(y-110*s)+' '+(x+5*s)+' '+(y-60*s)+' '+(x+11*s)+' '+y+'Z" fill="#6A4939"/>'
+    +'<path d="M'+x+' '+(y-120*s)+' q'+(-34*s)+' '+(-26*s)+' '+(-66*s)+' '+(-44*s)+'M'+x+' '+(y-135*s)+' q'+(30*s)+' '+(-30*s)+' '+(64*s)+' '+(-42*s)+'M'+x+' '+(y-150*s)+' q'+(-10*s)+' '+(-34*s)+' '+(-26*s)+' '+(-60*s)+'" fill="none" stroke="#6A4939" stroke-width="'+5*s+'" stroke-linecap="round"/>';
+  const bl=[];const n=winter?26:58;
+  for(let i=0;i<n;i++){const a=R()*6.283,r=Math.sqrt(R()),cx=x+Math.cos(a)*r*104*s,cy=y-188*s+Math.sin(a)*r*66*s,rad=(13+R()*17)*s*(winter?.7:1);
+    const up=(y-188*s-cy)/(66*s),left=(x-cx)/(104*s);let t=Math.floor(1.6+up*1.3+left*.6+R()*1.2);t=Math.max(0,Math.min(3,t));bl.push([t,cx,cy,rad]);}
+  bl.sort((a,b)=>a[0]-b[0]);
+  bl.forEach(b=>{h+='<circle cx="'+b[1].toFixed(1)+'" cy="'+b[2].toFixed(1)+'" r="'+b[3].toFixed(1)+'" fill="'+pal[b[0]]+'"'+(winter?' opacity=".92"':'')+'/>';});
+  return h;
+}
+function particles(R,n,col,snow){if(!col)return'';let h='';for(let i=0;i<n;i++){const x=R()*800,y=R()*360,s=snow?1.500+R()*2.500:3+R()*4;
+  h+=snow?'<circle cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" r="'+s.toFixed(1)+'" fill="'+col+'" opacity="'+(.5+R()*.5).toFixed(2)+'"/>'
+    :'<ellipse cx="'+x.toFixed(0)+'" cy="'+y.toFixed(0)+'" rx="'+s.toFixed(1)+'" ry="'+(s*.55).toFixed(1)+'" transform="rotate('+(R()*180).toFixed(0)+' '+x.toFixed(0)+' '+y.toFixed(0)+')" fill="'+col+'" opacity="'+(.55+R()*.45).toFixed(2)+'"/>';}return h;}
+function schoolB(u,x,y,w,hh,lit){
+  // 3-storey school, base at y
+  const top=y-hh,cx=x+w/2;let h='';
+  h+='<rect x="'+x+'" y="'+top+'" width="'+w+'" height="'+hh+'" fill="url(#'+u+'wall)"/>';
+  h+='<rect x="'+(x-6)+'" y="'+(top-8)+'" width="'+(w+12)+'" height="10" fill="#B9A58C"/>';
+  h+='<rect x="'+(cx-46)+'" y="'+(top-44)+'" width="92" height="'+(hh+44)+'" fill="url(#'+u+'wall2)"/><rect x="'+(cx-52)+'" y="'+(top-52)+'" width="104" height="10" fill="#B9A58C"/>';
+  h+='<circle cx="'+cx+'" cy="'+(top-20)+'" r="13" fill="#FDFBF4" stroke="#8C7B66" stroke-width="2.500"/><path d="M'+cx+' '+(top-20)+' v-8 M'+cx+' '+(top-20)+' h6" stroke="#5B4E40" stroke-width="2" stroke-linecap="round"/>';
+  const cols=Math.floor((w/2-60)/30),fh=hh/3;
+  for(let f=0;f<3;f++)for(let side=-1;side<=1;side+=2)for(let i=0;i<cols;i++){
+    const wx=side<0?x+12+i*30:x+w-12-22-i*30,wy=top+10+f*fh;
+    h+='<rect x="'+wx+'" y="'+wy+'" width="22" height="'+(fh-22)+'" fill="'+(lit?(((i+f)%3)?'#FFD98A':'#3B4A66'):'url(#'+u+'win)')+'" stroke="#FBF7EE" stroke-width="2"/>';
+  }
+  for(let f=0;f<2;f++)h+='<rect x="'+(cx-30)+'" y="'+(top+10+f*fh)+'" width="60" height="'+(fh-22)+'" fill="'+(lit?'#FFD98A':'url(#'+u+'win)')+'" stroke="#FBF7EE" stroke-width="2"/><path d="M'+cx+' '+(top+10+f*fh)+' v'+(fh-22)+'" stroke="#FBF7EE" stroke-width="2"/>';
+  h+='<rect x="'+(cx-40)+'" y="'+(y-fh+6)+'" width="80" height="8" fill="#8C7B66"/><rect x="'+(cx-26)+'" y="'+(y-fh+14)+'" width="52" height="'+(fh-14)+'" fill="'+(lit?'#FFE3A6':'#5E7285')+'"/><path d="M'+cx+' '+(y-fh+14)+' v'+(fh-14)+'" stroke="#FBF7EE" stroke-width="2"/>';
+  for(let f=1;f<3;f++)h+='<rect x="'+x+'" y="'+(top+f*fh-6)+'" width="'+w+'" height="3" fill="#C9B79E" opacity=".7"/>';
+  return h;
+}
+function sceneGate(season,seed){
+  const u='s'+(artUid++),P=SEA[season],R=prng(seed||7),win=season==='winter';
+  let h=sOpen(u,'학교 정문 풍경',lg(u+'sky',P.sky)+lg(u+'wall',['#FBF1E0','#EAD9BF'])+lg(u+'wall2',['#FFF7E8','#F0E0C6'])+lg(u+'win',['#9CC7EA','#DCEEFA'])+lg(u+'lawn',P.lawn)+lg(u+'path',['#EFE6D6','#D9CDB8'])
+    +'<radialGradient id="'+u+'sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="'+P.glow+'" stop-opacity=".95"/><stop offset="1" stop-color="'+P.glow+'" stop-opacity="0"/></radialGradient>'+vig(u));
+  h+='<rect width="800" height="360" fill="url(#'+u+'sky)"/><circle cx="640" cy="60" r="150" fill="url(#'+u+'sun)"/>';
+  h+=clouds(R,season==='summer'?5:3,30,110,season==='autumn'?.55:.85);
+  h+='<path d="M0 210 C120 150 240 190 360 170 C480 150 600 200 800 160 L800 280 L0 280Z" fill="'+P.hill[0]+'"/><path d="M0 232 C160 196 300 226 430 206 C560 190 680 226 800 204 L800 290 L0 290Z" fill="'+P.hill[1]+'"/>';
+  h+='<g>'+schoolB(u,210,268,380,128,false)+'</g>';
+  h+='<rect y="262" width="800" height="98" fill="url(#'+u+'lawn)"/>';
+  h+='<path d="M356 266 L444 266 L600 360 L200 360Z" fill="url(#'+u+'path)"/><path d="M400 266 L400 360" stroke="#fff" stroke-width="2" opacity=".35"/>';
+  // far small trees
+  for(let i=0;i<6;i++){const x=230+i*68+(i>2?-8:8);if(Math.abs(x-400)<60)continue;h+='<g>'+tree(R,x,270,.26,P.fol,win)+'</g>';}
+  // gate pillars
+  [150,650].forEach(x=>{h+='<rect x="'+(x-22)+'" y="196" width="44" height="130" fill="#C7A98A"/><rect x="'+(x-22)+'" y="196" width="14" height="130" fill="#B4967A"/><rect x="'+(x-28)+'" y="186" width="56" height="12" fill="#8C7460"/><rect x="'+(x-18)+'" y="174" width="36" height="12" fill="#A88D73"/>'
+    +'<rect x="'+(x-13)+'" y="216" width="26" height="62" rx="2" fill="#2F5446"/><text x="'+x+'" y="232" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="700" fill="#F2F5EB"><tspan x="'+x+'" dy="0">A</tspan><tspan x="'+x+'" dy="14">S</tspan><tspan x="'+x+'" dy="14">G</tspan><tspan x="'+x+'" dy="14">S</tspan></text>';});
+  h+='<g>'+tree(R,70,340,1.05,P.fol,win)+'</g><g>'+tree(R,735,344,1.1,P.fol,win)+'</g>';
+  h+='<g filter="url(#'+u+'b)">'+particles(R,win?70:46,P.part,win)+'</g>';
+  if(P.part&&!win)h+='<g filter="url(#'+u+'B)" opacity=".8">'+[0,1,2,3,4].map(()=>'<ellipse cx="'+(R()*800).toFixed(0)+'" cy="'+(R()*360).toFixed(0)+'" rx="22" ry="13" fill="'+P.part+'"/>').join('')+'</g>';
+  h+='<path d="M560 0 L800 0 L800 140 L300 360 L140 360Z" fill="'+P.glow+'" opacity=".12"/>';
+  return h+sClose(u);
+}
+function sceneClass(season,exam,seed){
+  const u='s'+(artUid++),P=SEA[season],R=prng(seed||11);
+  let h=sOpen(u,'교실 풍경',lg(u+'sky',P.sky)+lg(u+'wall',['#F7F0E3','#EDE2CF'])+lg(u+'floor',['#C99B6B','#A87B50'])+lg(u+'desk',['#F0D5A8','#D9B67F'])+vig(u,'#2A1F14'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'wall)"/><rect y="214" width="800" height="34" fill="#9DBFA6"/><rect y="214" width="800" height="4" fill="#7FA78C"/>';
+  h+='<rect y="246" width="800" height="114" fill="url(#'+u+'floor)"/>';
+  for(let i=0;i<9;i++)h+='<path d="M'+(i*100-40)+' 246 L'+(i*130-160)+' 360" stroke="#8E6540" stroke-width="1.500" opacity=".45"/>';
+  [[40,230],[290,230],[540,230]].forEach((wn,k)=>{const x=wn[0],w=wn[1];
+    h+='<g><clipPath id="'+u+'w'+k+'"><rect x="'+x+'" y="34" width="'+w+'" height="176"/></clipPath><g clip-path="url(#'+u+'w'+k+')"><rect x="'+x+'" y="34" width="'+w+'" height="176" fill="url(#'+u+'sky)"/>'
+      +'<path d="M'+x+' 170 q'+(w/2)+' -40 '+w+' -10 v60 h-'+w+'Z" fill="'+P.hill[1]+'"/><g filter="url(#'+u+'b)">';
+    for(let i=0;i<26;i++){const cx=x+R()*w,cy=120+R()*100,t=Math.min(3,Math.floor(R()*4));h+='<circle cx="'+cx.toFixed(0)+'" cy="'+cy.toFixed(0)+'" r="'+(16+R()*18).toFixed(0)+'" fill="'+P.fol[t]+'"/>';}
+    h+='</g>'+(season==='winter'?particles(prng(k+3),30,'#fff',true):'')+'</g>'
+      +'<rect x="'+x+'" y="34" width="'+w+'" height="176" fill="none" stroke="#FDFBF6" stroke-width="8"/><path d="M'+(x+w/2)+' 34 v176 M'+x+' 92 h'+w+'" stroke="#FDFBF6" stroke-width="5"/>'
+      +'<rect x="'+(x-10)+'" y="208" width="'+(w+20)+'" height="9" fill="#E9DFCC"/></g>';});
+  // curtains
+  [[18,52],[744,52]].forEach(c=>{h+='<path d="M'+c[0]+' 26 h'+c[1]+' q-10 90 -4 190 h-'+(c[1]-8)+' q8 -100 -4 -190Z" fill="#F6E7B8"/><path d="M'+(c[0]+16)+' 26 q-6 96 2 190 M'+(c[0]+32)+' 26 q-6 96 0 190" stroke="#E2CC8E" stroke-width="2" fill="none"/>';});
+  h+='<rect y="20" width="800" height="8" fill="#D8CBB4"/>';
+  // light beams
+  h+='<path d="M290 210 L520 210 L420 360 L120 360Z" fill="#FFF8DC" opacity=".22"/><path d="M540 210 L770 210 L720 360 L420 360Z" fill="#FFF8DC" opacity=".20"/>';
+  if(exam)h+='<circle cx="278" cy="24" r="0"/>';
+  // desks: back row then front row
+  function desk(x,y,s,paper){const w=120*s,d=16*s;let g='<rect x="'+(x+10*s)+'" y="'+(y+d)+'" width="'+5*s+'" height="'+62*s+'" fill="#6F7780"/><rect x="'+(x+w-15*s)+'" y="'+(y+d)+'" width="'+5*s+'" height="'+62*s+'" fill="#6F7780"/>'
+      +'<rect x="'+(x+4*s)+'" y="'+(y+d-2)+'" width="'+(w-8*s)+'" height="'+20*s+'" fill="#8A9199"/>'
+      +'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+d+'" rx="'+3*s+'" fill="url(#'+u+'desk)"/><rect x="'+x+'" y="'+(y+d-4*s)+'" width="'+w+'" height="'+4*s+'" rx="2" fill="#B8935F"/>';
+    if(paper)g+='<path d="M'+(x+34*s)+' '+(y+2*s)+' h'+44*s+' l'+6*s+' '+9*s+' h-'+56*s+'Z" fill="#fff"/><path d="M'+(x+86*s)+' '+(y+4*s)+' l'+16*s+' '+5*s+'" stroke="#E0A93B" stroke-width="'+3*s+'" stroke-linecap="round"/>';
+    // chair back
+    g+='<rect x="'+(x+30*s)+'" y="'+(y-34*s)+'" width="'+60*s+'" height="'+24*s+'" rx="'+5*s+'" fill="#C58B4E"/><rect x="'+(x+36*s)+'" y="'+(y-12*s)+'" width="'+4*s+'" height="'+14*s+'" fill="#6F7780"/><rect x="'+(x+80*s)+'" y="'+(y-12*s)+'" width="'+4*s+'" height="'+14*s+'" fill="#6F7780"/>';
+    return g;}
+  for(let i=0;i<5;i++)h+=desk(50+i*150,236,.72,exam);
+  for(let i=0;i<4;i++)h+=desk(-10+i*215,286,1.1,exam);
+  h+='<g filter="url(#'+u+'b)">'+particles(R,season==='spring'?10:0,P.part,false)+'</g>';
+  return h+sClose(u);
+}
+function sceneField(seed){
+  const u='s'+(artUid++),P=SEA.summer,R=prng(seed||5);
+  let h=sOpen(u,'체육대회가 열리는 운동장',lg(u+'sky',P.sky)+lg(u+'wall',['#FBF1E0','#EAD9BF'])+lg(u+'wall2',['#FFF7E8','#F0E0C6'])+lg(u+'win',['#9CC7EA','#DCEEFA'])+lg(u+'sand',['#EBD3A4','#D7B87F'])
+    +'<radialGradient id="'+u+'sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFFBE6" stop-opacity="1"/><stop offset="1" stop-color="#FFFBE6" stop-opacity="0"/></radialGradient>'+vig(u));
+  h+='<rect width="800" height="360" fill="url(#'+u+'sky)"/><circle cx="130" cy="50" r="140" fill="url(#'+u+'sun)"/>'+clouds(R,5,26,120,.92);
+  h+='<path d="M0 200 C200 150 420 196 800 150 L800 250 L0 250Z" fill="'+P.hill[0]+'"/>';
+  h+='<g transform="translate(430 0) scale(.62)" transform-origin="0 232">'+schoolB(u,60,232,380,128,false)+'</g>';
+  for(let i=0;i<7;i++)h+='<g>'+tree(R,40+i*58,232,.3,P.fol)+'</g>';
+  h+='<rect y="226" width="800" height="134" fill="url(#'+u+'sand)"/>';
+  for(let i=0;i<5;i++)h+='<ellipse cx="400" cy="'+(420+i*4)+'" rx="'+(470-i*46)+'" ry="'+(170-i*18)+'" fill="none" stroke="#fff" stroke-width="3.500" opacity=".85"/>';
+  h+='<path d="M0 226 h800" stroke="#C9A96C" stroke-width="2"/>';
+  // goal post
+  h+='<path d="M600 250 v-34 h70 v34" fill="none" stroke="#fff" stroke-width="4"/>';
+  // bunting
+  const cols=['#E9524A','#F6C445','#3F8FE0','#4DB678','#F28A3C'];
+  [[-20,36,820,70,60],[-20,84,820,104,72]].forEach((b,bi)=>{h+='<path d="M'+b[0]+' '+b[1]+' Q400 '+(b[1]+b[4])+' '+b[2]+' '+b[3]+'" fill="none" stroke="#fff" stroke-width="2"/>';
+    for(let i=0;i<19;i++){const t=(i+.5)/19,x=(1-t)*(1-t)*b[0]+2*(1-t)*t*400+t*t*b[2],y=(1-t)*(1-t)*b[1]+2*(1-t)*t*(b[1]+b[4])+t*t*b[3];h+='<path d="M'+(x-13).toFixed(0)+' '+y.toFixed(0)+' h26 l-13 26Z" fill="'+cols[(i+bi)%5]+'"/>';}});
+  // tent
+  h+='<path d="M60 226 v-40 M200 226 v-40" stroke="#8A8F98" stroke-width="4"/><path d="M40 190 L130 150 L220 190Z" fill="#fff"/><path d="M40 190 L130 150 L130 190Z" fill="#E9EEF5"/><rect x="40" y="188" width="180" height="8" fill="#3F8FE0"/>';
+  h+='<path d="M0 0 L300 0 L560 360 L60 360Z" fill="#FFFBE6" opacity=".10"/>';
+  return h+sClose(u);
+}
+function sceneFestival(seed){
+  const u='s'+(artUid++),R=prng(seed||9);
+  let h=sOpen(u,'저녁의 학교 축제',lg(u+'sky',['#2B2F6B','#7A4E8C','#F08C5A','#F8C27A'])+lg(u+'wall',['#5B5470','#463F5C'])+lg(u+'wall2',['#665E7C','#4E4666'])+lg(u+'gr',['#5A4B55','#3B3140'])+vig(u,'#120C1E'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'sky)"/>';
+  for(let i=0;i<40;i++)h+='<circle cx="'+(R()*800).toFixed(0)+'" cy="'+(R()*120).toFixed(0)+'" r="'+(.6+R()*1.2).toFixed(1)+'" fill="#fff" opacity="'+(.4+R()*.6).toFixed(2)+'"/>';
+  h+='<g>'+schoolB(u,230,262,340,118,true)+'</g><rect y="258" width="800" height="102" fill="url(#'+u+'gr)"/>';
+  h+='<ellipse cx="400" cy="262" rx="230" ry="26" fill="#FFD98A" opacity=".28" filter="url(#'+u+'B)"/>';
+  // booths
+  function booth(x,c1,c2){let g='<path d="M'+x+' 300 v-70 M'+(x+150)+' 300 v-70" stroke="#2A2230" stroke-width="5"/><rect x="'+(x+4)+'" y="264" width="142" height="40" fill="#3A3144"/>';
+    for(let i=0;i<6;i++)g+='<path d="M'+(x-8+i*27.700)+' 232 h27.700 v26 q-13.850 10 -27.700 0Z" fill="'+(i%2?c1:c2)+'"/>';
+    g+='<path d="M'+(x-8)+' 232 L'+(x+20)+' 206 h110 l28 26Z" fill="'+c1+'"/><rect x="'+(x+20)+'" y="270" width="110" height="20" rx="3" fill="#FFE9B8" opacity=".9"/>';return g;}
+  h+=booth(30,'#E9524A','#FFF3DC')+booth(620,'#3F8FE0','#FFF3DC');
+  // string lights
+  [[0,96,400,170,800,90],[0,150,400,214,800,140]].forEach(b=>{h+='<path d="M'+b[0]+' '+b[1]+' Q'+b[2]+' '+b[3]+' '+b[4]+' '+b[5]+'" fill="none" stroke="#2A2230" stroke-width="1.500"/>';
+    for(let i=0;i<21;i++){const t=(i+.5)/21,x=(1-t)*(1-t)*b[0]+2*(1-t)*t*b[2]+t*t*b[4],y=(1-t)*(1-t)*b[1]+2*(1-t)*t*b[3]+t*t*b[5];const c=['#FFD25E','#FF9A6B','#FFF1B8'][i%3];
+      h+='<circle cx="'+x.toFixed(0)+'" cy="'+(y+5).toFixed(0)+'" r="13" fill="'+c+'" opacity=".35" filter="url(#'+u+'b)"/><circle cx="'+x.toFixed(0)+'" cy="'+(y+5).toFixed(0)+'" r="4.500" fill="'+c+'"/>';}});
+  // crowd silhouettes
+  for(let i=0;i<22;i++){const x=180+R()*440,y=300+R()*50,s=.8+R()*.5;h+='<g fill="#221B2B" opacity=".9"><circle cx="'+x.toFixed(0)+'" cy="'+(y-26*s).toFixed(0)+'" r="'+(9*s).toFixed(1)+'"/><path d="M'+(x-14*s).toFixed(0)+' '+(y+30).toFixed(0)+' q0 '+(-44*s).toFixed(0)+' '+(14*s).toFixed(0)+' '+(-44*s).toFixed(0)+' q'+(14*s).toFixed(0)+' 0 '+(14*s).toFixed(0)+' '+(44*s).toFixed(0)+'Z"/></g>';}
+  h+='<g filter="url(#'+u+'B)" opacity=".7">'+[0,1,2,3,4,5].map(()=>'<circle cx="'+(R()*800).toFixed(0)+'" cy="'+(200+R()*160).toFixed(0)+'" r="16" fill="#FFD98A"/>').join('')+'</g>';
+  return h+sClose(u);
+}
+function sceneCounsel(seed){
+  const u='s'+(artUid++),R=prng(seed||21),P=SEA.spring;
+  let h=sOpen(u,'진로 상담실',lg(u+'wall',['#F6EEDF','#EBDDC6'])+lg(u+'floor',['#C7A47A','#A9865C'])+lg(u+'sky',['#9CCBEF','#E6F3FB'])+lg(u+'tb',['#F3DDB6','#DDBE8A'])+vig(u,'#2A1F14'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'wall)"/><rect y="262" width="800" height="98" fill="url(#'+u+'floor)"/><rect y="258" width="800" height="6" fill="#B79468"/>';
+  // window with blinds
+  h+='<rect x="64" y="40" width="210" height="170" fill="url(#'+u+'sky)"/><g filter="url(#'+u+'b)"><circle cx="110" cy="190" r="40" fill="'+P.fol[1]+'"/><circle cx="170" cy="200" r="46" fill="'+P.fol[2]+'"/><circle cx="240" cy="186" r="38" fill="'+P.fol[0]+'"/></g>';
+  for(let i=0;i<9;i++)h+='<rect x="64" y="'+(44+i*18)+'" width="210" height="5" fill="#fff" opacity=".7"/>';
+  h+='<rect x="64" y="40" width="210" height="170" fill="none" stroke="#FDFBF6" stroke-width="8"/><rect x="54" y="208" width="230" height="9" fill="#E9DFCC"/>';
+  h+='<path d="M64 210 L274 210 L360 360 L20 360Z" fill="#FFF8DC" opacity=".22"/>';
+  // bookshelf
+  h+='<rect x="520" y="36" width="236" height="226" fill="#B98B58"/><rect x="528" y="44" width="220" height="210" fill="#8A6238"/>';
+  const bc=['#D9534F','#4A90D9','#F0B84A','#5BB58A','#8E6BBF','#F2F0E8','#E67E45','#3C5A7A'];
+  for(let r=0;r<4;r++){let x=532;const y=48+r*52;while(x<736){const w=8+R()*10,hh=34+R()*12;if(R()<.12){x+=14;continue;}h+='<rect x="'+x.toFixed(0)+'" y="'+(y+46-hh).toFixed(0)+'" width="'+w.toFixed(0)+'" height="'+hh.toFixed(0)+'" fill="'+bc[Math.floor(R()*8)]+'"/>';x+=w+1.500;}
+    h+='<rect x="528" y="'+(y+46)+'" width="220" height="6" fill="#B98B58"/>';}
+  // posters
+  h+='<rect x="320" y="52" width="74" height="96" fill="#fff" stroke="#D9CDB8" stroke-width="3"/><circle cx="357" cy="86" r="18" fill="#F0B84A"/><path d="M330 134 l18 -24 l14 14 l10 -10 l14 20Z" fill="#5BB58A"/>';
+  h+='<rect x="414" y="52" width="74" height="96" fill="#fff" stroke="#D9CDB8" stroke-width="3"/><path d="M426 130 v-30 h12 v30Z M444 130 v-48 h12 v48Z M462 130 v-62 h12 v62Z" fill="#4A90D9"/>';
+  // plant
+  h+='<path d="M452 262 h44 l-6 -40 h-32Z" fill="#C8744A"/><g fill="#4A9E5C"><ellipse cx="474" cy="196" rx="12" ry="34"/><ellipse cx="454" cy="204" rx="10" ry="28" transform="rotate(-28 454 204)"/><ellipse cx="494" cy="204" rx="10" ry="28" transform="rotate(28 494 204)"/></g><g fill="#74BE6A"><ellipse cx="470" cy="200" rx="5" ry="26"/></g>';
+  // table and chairs
+  h+='<rect x="150" y="226" width="60" height="74" rx="10" fill="#7C9CB8"/><rect x="590" y="226" width="60" height="74" rx="10" fill="#7C9CB8"/>';
+  h+='<ellipse cx="400" cy="352" rx="250" ry="14" fill="#000" opacity=".12"/><rect x="386" y="290" width="28" height="64" fill="#9C7B52"/><ellipse cx="400" cy="286" rx="230" ry="26" fill="url(#'+u+'tb)"/><ellipse cx="400" cy="292" rx="230" ry="24" fill="none" stroke="#B8935F" stroke-width="5" opacity=".6"/>';
+  h+='<path d="M300 276 h70 l8 14 h-86Z" fill="#fff"/><path d="M430 272 h60 l10 16 h-80Z" fill="#FFF3C4"/><rect x="520" y="262" width="20" height="22" rx="3" fill="#E9524A"/><ellipse cx="530" cy="262" rx="10" ry="3" fill="#B53A34"/>';
+  return h+sClose(u);
+}
+function sceneNight(winter,seed){
+  const u='s'+(artUid++),R=prng(seed||31);
+  let h=sOpen(u,'밤에 공부하는 책상',lg(u+'wall',['#27304F','#1B2238'])+lg(u+'sky',['#0E1533','#2A3A6E','#56609A'])+lg(u+'desk',['#8A633F','#6B4A2D'])
+    +'<radialGradient id="'+u+'lamp" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFE7A8" stop-opacity=".95"/><stop offset=".5" stop-color="#FFC96B" stop-opacity=".35"/><stop offset="1" stop-color="#FFC96B" stop-opacity="0"/></radialGradient>'+vig(u,'#05070F'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'wall)"/>';
+  h+='<g><clipPath id="'+u+'w"><rect x="70" y="30" width="300" height="200"/></clipPath><g clip-path="url(#'+u+'w)"><rect x="70" y="30" width="300" height="200" fill="url(#'+u+'sky)"/>';
+  for(let i=0;i<30;i++)h+='<circle cx="'+(70+R()*300).toFixed(0)+'" cy="'+(30+R()*110).toFixed(0)+'" r="'+(.6+R()*1.100).toFixed(1)+'" fill="#fff" opacity="'+(.4+R()*.6).toFixed(2)+'"/>';
+  h+='<circle cx="300" cy="78" r="22" fill="#FFF4C9"/><circle cx="300" cy="78" r="44" fill="#FFF4C9" opacity=".18"/>';
+  for(let i=0;i<9;i++){const x=70+i*34,bh=40+R()*70;h+='<rect x="'+x+'" y="'+(230-bh).toFixed(0)+'" width="30" height="'+bh.toFixed(0)+'" fill="#141B36"/>';for(let k=0;k<5;k++)if(R()<.6)h+='<rect x="'+(x+4+(k%2)*13)+'" y="'+(230-bh+8+Math.floor(k/2)*16).toFixed(0)+'" width="7" height="8" fill="#FFD98A" opacity=".85"/>';}
+  if(winter)h+=particles(R,60,'#fff',true);
+  h+='</g><rect x="70" y="30" width="300" height="200" fill="none" stroke="#3B466B" stroke-width="9"/><path d="M220 30 v200" stroke="#3B466B" stroke-width="6"/></g>';
+  // shelf + calendar
+  h+='<rect x="470" y="70" width="250" height="10" fill="#4A3724"/>';
+  ['#D9534F','#4A90D9','#F0B84A','#5BB58A','#8E6BBF','#E67E45'].forEach((c,i)=>{h+='<rect x="'+(486+i*22)+'" y="'+(26+(i%3)*4)+'" width="18" height="'+(44-(i%3)*4)+'" fill="'+c+'" opacity=".8"/>';});
+  h+='<rect x="640" y="100" width="70" height="84" fill="#F4F1E8"/><rect x="640" y="100" width="70" height="18" fill="#D9534F"/>';for(let r=0;r<4;r++)for(let c=0;c<5;c++)h+='<rect x="'+(647+c*12)+'" y="'+(126+r*13)+'" width="8" height="8" fill="#C9C4B6"/>';
+  // desk
+  h+='<rect y="268" width="800" height="92" fill="url(#'+u+'desk)"/><rect y="264" width="800" height="8" fill="#A47A50"/>';
+  h+='<circle cx="520" cy="230" r="230" fill="url(#'+u+'lamp)"/>';
+  // lamp
+  h+='<path d="M610 268 h60 l-6 -10 h-48Z" fill="#2B3350"/><path d="M640 258 L612 150" stroke="#2B3350" stroke-width="7" stroke-linecap="round"/><path d="M612 150 L560 124" stroke="#2B3350" stroke-width="7" stroke-linecap="round"/><path d="M528 116 l52 -16 l14 38 l-66 14Z" fill="#E9524A"/><ellipse cx="561" cy="145" rx="33" ry="8" transform="rotate(-12 561 145)" fill="#FFF1C2"/>';
+  // open book, mug, books
+  h+='<path d="M360 300 Q420 282 480 296 L480 330 Q420 316 360 334Z" fill="#FFF8E6"/><path d="M480 296 Q540 282 600 300 L600 334 Q540 316 480 330Z" fill="#FFFDF3"/><path d="M480 296 v34" stroke="#D9CDB8" stroke-width="2"/>';
+  for(let i=0;i<4;i++)h+='<path d="M'+(374)+' '+(304+i*6)+' q46 -12 94 -2 M'+(492)+' '+(302+i*6)+' q46 -10 96 2" stroke="#B9B2A2" stroke-width="1.500" fill="none"/>';
+  h+='<rect x="236" y="288" width="34" height="38" rx="5" fill="#F4F1E8"/><path d="M270 296 q16 2 14 14 q-2 10 -14 8" fill="none" stroke="#F4F1E8" stroke-width="5"/><path d="M244 284 q4 -10 0 -18 M258 284 q4 -10 0 -18" stroke="#fff" stroke-width="2.500" opacity=".5" fill="none" stroke-linecap="round"/>';
+  h+='<rect x="110" y="304" width="96" height="14" fill="#4A90D9"/><rect x="116" y="290" width="88" height="14" fill="#5BB58A"/><rect x="106" y="276" width="92" height="14" fill="#F0B84A"/>';
+  return h+sClose(u);
+}
+function sceneHall(text,seed){
+  const u='s'+(artUid++),R=prng(seed||41);
+  let h=sOpen(u,'강당에서 열리는 '+text,lg(u+'wall',['#F3E6CF','#E2CFAE'])+lg(u+'cur',['#B5322F','#7E1F22'])+lg(u+'stage',['#C99B6B','#9F7448'])+lg(u+'fl',['#6E5338','#4E3A26'])+vig(u,'#1A0E08'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'wall)"/>';
+  h+='<rect x="90" y="40" width="620" height="200" fill="#3A2A30"/>';
+  // curtains
+  [[90,0],[710,1]].forEach(c=>{const x=c[0],d=c[1]?-1:1;h+='<path d="M'+x+' 40 h'+(d*150)+' q'+(-d*40)+' 90 '+(-d*110)+' 200 h'+(-d*40)+'Z" fill="url(#'+u+'cur)"/>';for(let i=1;i<5;i++)h+='<path d="M'+(x+d*i*28)+' 40 q'+(-d*14)+' 100 '+(-d*i*20)+' 200" stroke="#6A171B" stroke-width="2.500" fill="none" opacity=".6"/>';});
+  h+='<path d="M90 40 h620 v34 q-52 26 -103 0 q-52 26 -103 0 q-52 26 -104 0 q-52 26 -103 0 q-52 26 -103 0 q-52 26 -104 0Z" fill="url(#'+u+'cur)"/><rect x="80" y="30" width="640" height="14" fill="#C9A24A"/>';
+  // banner
+  h+='<rect x="210" y="96" width="380" height="64" rx="4" fill="#FFFDF5"/><rect x="210" y="96" width="380" height="64" rx="4" fill="none" stroke="#C9A24A" stroke-width="3"/><text x="400" y="139" text-anchor="middle" font-family="Gaegu,\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif" font-weight="700" font-size="38" fill="#2A2320">'+text+'</text>';
+  // spotlights
+  h+='<path d="M250 44 L170 240 L330 240Z" fill="#FFF3C9" opacity=".16"/><path d="M550 44 L470 240 L630 240Z" fill="#FFF3C9" opacity=".16"/><path d="M400 44 L330 240 L470 240Z" fill="#FFF3C9" opacity=".13"/>';
+  // stage
+  h+='<rect x="60" y="238" width="680" height="34" fill="url(#'+u+'stage)"/><rect x="60" y="238" width="680" height="5" fill="#E2BE8E"/><rect y="270" width="800" height="90" fill="url(#'+u+'fl)"/>';
+  // podium + flowers
+  h+='<path d="M372 238 l6 -50 h44 l6 50Z" fill="#7A5634"/><rect x="368" y="182" width="64" height="8" fill="#5E4026"/>';
+  [[150,0],[650,0]].forEach(f=>{const x=f[0];h+='<path d="M'+(x-18)+' 238 h36 l-5 -30 h-26Z" fill="#F4F1E8"/>';const fc=['#F28AA6','#FFD25E','#fff','#F2665C','#F9B7C8'];
+    for(let i=0;i<16;i++){const a=R()*3.140,r=8+R()*26;h+='<circle cx="'+(x+Math.cos(a)*r).toFixed(0)+'" cy="'+(204-Math.sin(a)*r*.9).toFixed(0)+'" r="'+(6+R()*4).toFixed(0)+'" fill="'+fc[Math.floor(R()*5)]+'"/>';}
+    for(let i=0;i<7;i++)h+='<ellipse cx="'+(x-26+R()*52).toFixed(0)+'" cy="'+(206-R()*10).toFixed(0)+'" rx="7" ry="3" fill="#4A9E5C" transform="rotate('+(R()*90-45).toFixed(0)+' '+x+' 206)"/>';});
+  // chairs rows (audience backs)
+  for(let r=0;r<3;r++){const y=292+r*26,s=.8+r*.22,n=Math.floor(820/(46*s));for(let i=0;i<n;i++){const x=-10+i*46*s+(r%2)*18;h+='<rect x="'+x.toFixed(0)+'" y="'+y+'" width="'+(36*s).toFixed(0)+'" height="'+(40*s).toFixed(0)+'" rx="'+(6*s).toFixed(0)+'" fill="'+['#3F5D8A','#35507A','#2B4368'][r]+'"/>';}}
+  for(let i=0;i<26;i++){const x=R()*800,y=20+R()*220;h+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="7" height="4" fill="'+['#FFD25E','#F28AA6','#7EC8F2','#fff'][i%4]+'" transform="rotate('+(R()*180).toFixed(0)+' '+x.toFixed(0)+' '+y.toFixed(0)+')" opacity=".9"/>';}
+  return h+sClose(u);
+}
+function sceneWork(seed){
+  const u='s'+(artUid++),R=prng(seed||51);
+  let h=sOpen(u,'직업교육 실습실',lg(u+'wall',['#E9EEF2','#D5DEE6'])+lg(u+'floor',['#9AA7B2','#7E8B96'])+lg(u+'sky',['#8FC3EE','#E3F1FB'])+lg(u+'bench',['#E3C28E','#C9A46A'])+vig(u,'#101820'));
+  h+='<rect width="800" height="360" fill="url(#'+u+'wall)"/><rect y="250" width="800" height="110" fill="url(#'+u+'floor)"/><rect y="246" width="800" height="6" fill="#6F7C87"/>';
+  h+='<rect y="232" width="800" height="14" fill="#F2B63C"/>';for(let i=0;i<20;i++)h+='<path d="M'+(i*44)+' 246 l14 -14 h14 l-14 14Z" fill="#2A2F36"/>';
+  // window
+  h+='<rect x="40" y="36" width="180" height="150" fill="url(#'+u+'sky)"/><g filter="url(#'+u+'b)"><circle cx="90" cy="170" r="34" fill="#68B866"/><circle cx="170" cy="176" r="40" fill="#3E935A"/></g><rect x="40" y="36" width="180" height="150" fill="none" stroke="#fff" stroke-width="8"/><path d="M130 36 v150" stroke="#fff" stroke-width="5"/>';
+  h+='<path d="M40 186 L220 186 L300 360 L0 360Z" fill="#FFFBE6" opacity=".2"/>';
+  // pegboard with tools
+  h+='<rect x="270" y="40" width="300" height="150" rx="4" fill="#C9B08A"/>';for(let r=0;r<7;r++)for(let c=0;c<15;c++)h+='<circle cx="'+(284+c*19.500)+'" cy="'+(54+r*20)+'" r="1.800" fill="#9A8262"/>';
+  h+='<g fill="#5A6470"><rect x="296" y="60" width="10" height="70" rx="3"/><rect x="286" y="54" width="30" height="16" rx="3"/></g>';
+  h+='<g><rect x="340" y="56" width="8" height="64" fill="#C8744A"/><path d="M332 120 h24 l-4 44 h-16Z" fill="#8A929C"/></g>';
+  h+='<g><rect x="384" y="60" width="9" height="46" fill="#E9524A"/><rect x="386" y="106" width="5" height="56" fill="#8A929C"/></g><g><rect x="414" y="60" width="9" height="46" fill="#3F8FE0"/><rect x="416" y="106" width="5" height="46" fill="#8A929C"/></g>';
+  h+='<path d="M452 60 q26 0 26 26 h-12 q0 -14 -14 -14Z M458 84 h8 v76 h-8Z" fill="#6F7780"/>';
+  h+='<g><circle cx="520" cy="84" r="22" fill="none" stroke="#F2B63C" stroke-width="8"/><rect x="496" y="126" width="48" height="12" rx="3" fill="#5BB58A"/><rect x="496" y="146" width="48" height="12" rx="3" fill="#E67E45"/></g>';
+  // monitors
+  h+='<rect x="620" y="96" width="140" height="92" rx="5" fill="#2A2F36"/><rect x="628" y="104" width="124" height="70" fill="#1E3A5C"/><path d="M636 162 l22 -28 l18 16 l22 -34 l26 30 l16 -12 v28Z" fill="#4DB6E8" opacity=".8"/><rect x="680" y="188" width="20" height="18" fill="#5A6470"/><rect x="656" y="204" width="68" height="8" rx="3" fill="#5A6470"/>';
+  // bench
+  h+='<rect x="30" y="226" width="20" height="134" fill="#5A6470"/><rect x="750" y="226" width="20" height="134" fill="#5A6470"/><rect x="10" y="206" width="780" height="26" rx="4" fill="url(#'+u+'bench)"/><rect x="10" y="226" width="780" height="6" fill="#A8854F"/>';
+  h+='<rect x="80" y="262" width="640" height="10" fill="#6F7780"/>';
+  // toolbox, vise, parts
+  h+='<rect x="96" y="172" width="110" height="36" rx="4" fill="#D9534F"/><rect x="96" y="172" width="110" height="10" rx="4" fill="#B53A34"/><path d="M130 172 v-12 h42 v12" fill="none" stroke="#2A2F36" stroke-width="5"/><rect x="144" y="186" width="14" height="8" fill="#F2B63C"/>';
+  h+='<rect x="300" y="186" width="70" height="20" fill="#4A5560"/><rect x="316" y="166" width="16" height="22" fill="#6F7C87"/><rect x="344" y="166" width="16" height="22" fill="#6F7C87"/><path d="M370 196 h30" stroke="#2A2F36" stroke-width="5" stroke-linecap="round"/><circle cx="404" cy="196" r="5" fill="#2A2F36"/>';
+  h+='<path d="M470 204 h80 l10 -16 h-100Z" fill="#fff"/><path d="M482 198 h52 M486 193 h44" stroke="#9DB6D6" stroke-width="1.800"/><circle cx="590" cy="196" r="12" fill="none" stroke="#8A929C" stroke-width="6"/>';
+  // overhead lamps
+  [200,400,600].forEach(x=>{h+='<path d="M'+x+' 0 v16" stroke="#5A6470" stroke-width="3"/><path d="M'+(x-34)+' 30 q34 -22 68 0Z" fill="#3B454F"/><ellipse cx="'+x+'" cy="31" rx="30" ry="5" fill="#FFF6D0"/><path d="M'+(x-30)+' 32 L'+(x-90)+' 210 h180 L'+(x+30)+' 32Z" fill="#FFF6D0" opacity=".10"/>';});
+  return h+sClose(u);
+}
+const sceneCache={};
+function sceneSvg(k){
+  if(sceneCache[k])return sceneCache[k];
+  const p=k.split(':');let h;
+  switch(p[0]){
+    case'gate':h=sceneGate(p[1]);break;case'class':h=sceneClass(p[1],p[2]==='1');break;case'field':h=sceneField();break;
+    case'festival':h=sceneFestival();break;case'counsel':h=sceneCounsel();break;case'night':h=sceneNight(p[1]==='1');break;
+    case'hall':h=sceneHall(p[1]);break;default:h=sceneWork();
+  }
+  return sceneCache[k]=h;
+}
+function sceneKey(){
+  const y=year(),s=slot();
+  if(S.phase==='yearend')return'hall:'+y+'학년 종업식';
+  if(S.phase==='final'){const p=S.fin.pages[S.fp];return p==='grad'?'hall:졸업식':(p==='jobres'||p==='contract')?'work':p==='fallback'?'counsel':'gate:winter';}
+  if(y===3&&S.path==='job')return['work','work','work','work','gate:summer','counsel','counsel','hall:졸업식'][s];
+  return{1:['gate:spring','class:spring:1','field','class:summer:1','gate:summer','class:autumn:1','festival','counsel'],
+    2:['gate:spring','class:spring:1','class:summer:0','class:summer:1','gate:summer','counsel','class:winter:1','night:1'],
+    3:['gate:spring','class:spring:1','class:summer:1','class:summer:1','night:0','gate:autumn','night:1','hall:졸업식']}[y][s];
+}
+function mood(){
+  const s=S.stats;
+  if(S.phase==='final'){const f=S.fin,p=f.pages[S.fp];
+    if(p==='grad'||p==='contract')return'happy';if(p==='fallback')return'worry';
+    if(p==='susi')return f.sb?'happy':'worry';if(p==='jeongsi')return f.jb?'happy':'worry';if(p==='jobres')return f.lv==='none'?'worry':'happy';}
+  if(S.phase==='burn'||s.hp<30||s.mind<30)return'tired';
+  if(S.phase==='yearend')return'happy';
+  if(S.phase==='result'&&S.res){const e=S.res.exams;
+    if(e.some(x=>x.kind==='cert'&&!x.ok))return'worry';
+    if(e.some(x=>x.kind==='cert'&&x.ok))return'happy';
+    const x=e.find(x=>x.kind!=='cert'&&x.prev!=null);
+    if(x){const d=x.prev-x.avg;if(d>=0.3)return'happy';if(d<=-0.3)return'worry';}}
+  return s.mind>=75?'happy':'smile';
+}
+function banner(key,ex,solo){return'<div class="scn'+(solo?' solo':'')+'">'+sceneSvg(key||sceneKey())+chara(S.ch,{ex:ex||mood(),cls:'who'})+'</div>';}
+const sheetOpen=()=>'<section class="sheet">'+banner();
 function chips(fx){
   const ks=Object.keys(fx||{}).filter(k=>fx[k]);if(!ks.length)return'';
   return'<span class="dl">'+ks.map(k=>'<i class="d '+(fx[k]>0?'up':'dn')+'">'+STN[k]+' '+(fx[k]>0?'+':'−')+Math.abs(fx[k])+'</i>').join('')+'</span>';
@@ -747,10 +1103,10 @@ function shd(title,left){return'<div class="shd"><span class="shd-m">'+(left||(y
 function vTitle(){
   const sv=loadSave();let rs='';
   if(sv&&sv.phase!=='ending'){const y=Math.floor(sv.t/8)+1;rs='<button class="btn ghost" data-a="resume">이어서 하기 ('+esc(sv.name)+', '+y+'학년)</button>';}
-  return'<main class="wrap"><section class="bb"><p class="bb-date">3월 2일 월요일 · 주번: 나</p>'
+  return'<main class="wrap"><div class="hero"><div class="kv">'+sceneSvg('gate:spring')+chara('f',{cls:'who l'})+chara('m',{cls:'who r',ex:'happy'})+'</div><section class="bb"><p class="bb-date">3월 2일 월요일 · 주번: 나</p>'
     +'<h1 class="bb-title"><span>ASGS</span> 고교 3년</h1>'
     +'<p class="bb-sub">입학식부터 졸업식까지.<br>시험, 모의고사, 동아리, 진로 결정을 내가 고른다.</p>'
-    +'<div class="bb-btns"><button class="btn chalk" data-a="tochar">입학하기</button>'+rs+'</div></section>'
+    +'<div class="bb-btns"><button class="btn chalk" data-a="tochar">입학하기</button>'+rs+'</div></section></div>'
     +'<section class="sheet"><h2 class="h3">게임 방법</h2><ol class="how">'
     +'<li><span><b>한 달 계획</b> 활동 카드 3장을 골라 시간을 쓴다. 공부만 하면 체력과 마음이 떨어진다.</span></li>'
     +'<li><span><b>이달의 선택</b> 동아리, 과목 선택, 진로 상담처럼 그달에 생기는 일에 답을 고른다.</span></li>'
@@ -759,7 +1115,7 @@ function vTitle(){
 }
 function vChar(){
   const cards=['f','m'].map(k=>{const c=CHARS[k];return'<button class="charc'+(UI.sel===k?' on':'')+'" data-a="sel" data-v="'+k+'" data-k="ch-'+k+'" aria-pressed="'+(UI.sel===k)+'">'
-    +avatar(k,84)+'<span class="cl">'+c.label+'</span><span class="cn">'+c.name+'</span><span class="ct">'+c.line+'</span><span class="cd">'+c.desc+'</span></button>';}).join('');
+    +'<span class="idp">'+chara(k,{})+'</span><span class="cl">'+c.label+'</span><span class="cn">'+c.name+'</span><span class="ct">'+c.line+'</span><span class="cd">'+c.desc+'</span></button>';}).join('');
   return'<main class="wrap"><section class="sheet">'+shd('신입생 등록','ASGS 1학년')
     +'<p class="lead">3년 동안 함께할 학생을 고른다. 두 사람 모두 아직 하고 싶은 일을 정하지 못했다.</p>'
     +'<div class="chars">'+cards+'</div>'
@@ -772,20 +1128,21 @@ function vHud(){
   for(let i=0;i<24;i++)ticks+='<i class="'+(i<S.t?'pd':i===S.t?'cu':'')+(i&&i%8===0?' ys':'')+'"></i>';
   const gs=keys.map((k,i)=>{const v=S.stats[k],low=(k==='hp'||k==='mind')&&v<30,chg=prev&&prev[k]!==undefined&&prev[k]!==v;
     return'<div class="gg'+(i===2||i===5?' sep':'')+(low?' low':'')+(chg?' chg':'')+'"><span>'+STN[k]+'</span><b>'+v+'</b><i class="bar"><i style="width:'+v+'%"></i></i></div>';}).join('');
-  return'<header class="hud"><div class="hud-in"><div class="hud-top"><span class="hud-av">'+avatar(S.ch,38)+'</span>'
+  return'<header class="hud"><div class="hud-in"><div class="hud-top"><span class="hud-av">'+chara(S.ch,{face:1,w:40,ex:mood()})+'</span>'
     +'<div class="hud-id"><b>'+esc(S.name)+'</b><span>'+year()+'학년 '+c.m+' · '+c.n+'</span></div>'
     +'<div class="hud-btn"><button data-a="modal" data-v="rec" data-k="m-rec">학생부</button><button data-a="modal" data-v="grade" data-k="m-grade">성적표</button></div></div>'
     +'<div class="ticks" role="img" aria-label="전체 24개월 가운데 '+(S.t+1)+'번째 달">'+ticks+'</div>'
     +'<div class="gauges">'+gs+'</div></div></header>';
 }
+function slotsHtml(){return[0,1,2].map(i=>{const a=ACT[S.picks[i]];return'<span class="slot'+(a?' on':'')+'">'+(a?a.n:'비어 있음')+'</span>';}).join('');}
 function vPlan(){
   const c=ctx(),list=ACTS.filter(a=>!a.when||a.when(c)),tired=S.stats.hp<30||S.stats.mind<30;
-  const slots=[0,1,2].map(i=>{const a=ACT[S.picks[i]];return'<span class="slot'+(a?' on':'')+'">'+(a?a.n:'비어 있음')+'</span>';}).join('');
+  const slots=slotsHtml();
   const cards=list.map(a=>{const on=S.picks.includes(a.id),full=S.picks.length>=3&&!on;
     const d=a.id==='club'?(S.club?F[S.club].club:''):a.d;
     return'<button class="actc'+(on?' on':'')+'" data-a="pick" data-v="'+a.id+'" data-k="act-'+a.id+'" aria-pressed="'+on+'"'+(full?' disabled':'')+'>'
       +'<span class="ic" aria-hidden="true">'+a.ic+'</span><span class="an">'+a.n+'</span><span class="ad">'+d+'</span><span class="af">'+fxText(a.fx)+'</span></button>';}).join('');
-  return'<section class="sheet">'+shd(cal().n)+'<p class="lead">'+intro()+'</p>'
+  return sheetOpen()+shd(cal().n)+'<p class="lead">'+intro()+'</p>'
     +(S.hap?'<p class="note"><b>이달의 소식</b><span>'+S.hap.t+'</span>'+chips(S.hap.fx)+'</p>':'')
     +(tired?'<p class="note warn">몸이나 마음이 많이 지쳤다. 이 상태에서는 공부와 활동의 효과가 줄어든다. 0이 되면 한 달을 통째로 쉬어야 한다.</p>':'')
     +'<h3 class="q"><span class="qn">문제 1.</span>이번 달 시간을 어디에 쓸까? <em>3개 선택</em></h3>'
@@ -794,7 +1151,7 @@ function vPlan(){
     +'<button class="textbtn" data-a="totitle">처음 화면으로 (진행 상황은 저장된다)</button>';
 }
 function vBurn(){
-  return'<section class="sheet">'+shd(cal().n)+'<p class="stamp no">번아웃</p>'
+  return sheetOpen()+shd(cal().n)+'<p class="stamp no">번아웃</p>'
     +'<p class="lead">아침에 몸이 일어나지지 않는다. 책을 펴도 글자가 흩어진다. 보건 선생님은 지금 필요한 건 계획이 아니라 쉬는 것이라고 했다.</p>'
     +'<p class="muted">이번 달은 계획을 세우지 않고 쉬어 간다. 체력과 마음이 회복되고, 그동안 성적은 조금 내려간다.</p>'
     +'<button class="btn" data-a="burn" data-k="go">한 달 쉬어 간다</button></section>';
@@ -806,7 +1163,7 @@ function vDone(){
 }
 function vEvent(){
   const steps=evSteps(),st=steps[S.step],last=S.log[S.log.length-1];
-  return(S.step===0?vDone():'')+'<section class="sheet">'+shd(cal().n)
+  return(S.step===0?vDone():'')+sheetOpen()+shd(cal().n)
     +(S.step>0&&last?'<div class="prevres"><span>'+last.res+'</span>'+chips(last.fx)+'</div>':'')
     +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+'</h3>'
     +(st.text?'<p class="lead">'+st.text+'</p>':'')
@@ -822,7 +1179,7 @@ function examCard(e){
 }
 function vResult(){
   const R=S.res,c=cal();
-  let h='<section class="sheet">'+shd(c.n);
+  let h=sheetOpen()+shd(c.n);
   h+=S.log.map(l=>'<div class="res"><p class="res-q">'+l.q+'</p><p class="res-t">'+l.res+'</p>'+chips(l.fx)+'</div>').join('');
   h+=R.exams.map(examCard).join('');
   if(S.newRecs.length)h+='<div class="recnew"><b>학생부에 기록됐다</b><ul>'+S.newRecs.map(r=>'<li>'+r.cat+': '+r.text+'</li>').join('')+'</ul></div>';
@@ -833,7 +1190,7 @@ function vResult(){
 function vYearEnd(){
   const y=year(),ex=S.exams.filter(e=>e.y===y),mk=S.mocks.filter(e=>e.y===y),d={};
   hudKeys().forEach(k=>{const v=S.stats[k]-S.stY[k];if(v)d[k]=v;});
-  return'<section class="sheet">'+shd(y+'학년을 마치며',y+'학년 종업식')
+  return sheetOpen()+shd(y+'학년을 마치며',y+'학년 종업식')
     +'<p class="lead">'+(y===1?'교실 뒤 사물함을 비웠다. 3월에는 낯설던 복도가 이제는 눈을 감고도 걷는다.':'2학년 교실에서 보내는 마지막 날. 다음에 이 계단을 오를 때는 3학년이다.')+'</p>'
     +'<dl class="kv"><div><dt>내신 평균</dt><dd>'+(ex.length?g1(mean(ex.map(e=>e.avg))):'-')+'</dd></div><div><dt>모의고사 평균</dt><dd>'+(mk.length?g1(mean(mk.map(e=>e.avg))):'-')+'</dd></div><div><dt>학생부 기록</dt><dd>'+S.recs.filter(r=>r.y===y).length+'건</dd></div></dl>'
     +'<h3 class="h3">1년 동안의 변화</h3><div>'+(chips(d)||'<span class="muted">큰 변화가 없었다.</span>')+'</div>'
@@ -843,32 +1200,32 @@ function vFinal(){
   const f=S.fin,p=f.pages[S.fp];
   const appList=(a,names)=>'<ul class="apps">'+a.map((x,i)=>'<li class="'+(x.pass?'ok':'no')+'"><span>'+(names?names[i]+' · ':'')+x.lv+' 지원</span><b>'+(x.pass?'합격':'불합격')+'</b>'+(x.why?'<small>'+x.why+'</small>':'')+'</li>').join('')+'</ul>';
   const nextBtn='<button class="btn" data-a="fnext" data-k="go">다음</button>';
-  if(p==='susi')return'<section class="sheet">'+shd('수시 합격자 발표','3학년 12월')
+  if(p==='susi')return sheetOpen()+shd('수시 합격자 발표','3학년 12월')
     +'<p class="lead">대학 홈페이지에 수험번호를 입력한다. 손끝이 차갑다.</p><p class="muted">지원 전형: '+TRACKN[f.key]+', 목표 학과: '+S.major+'</p>'+appList(f.susi)
     +'<p class="res-t">'+(f.sb?'「'+S.major+'」 '+f.sb+' 지원 대학에 합격했다. 수시에 합격했으므로 정시에는 지원하지 않는다.':'여섯 곳 모두 합격 소식이 없다. 수능 성적으로 정시에 지원한다.')+'</p>'+nextBtn+'</section>';
-  if(p==='jeongsi')return'<section class="sheet">'+shd('정시 합격자 발표','3학년 2월')
+  if(p==='jeongsi')return sheetOpen()+shd('정시 합격자 발표','3학년 2월')
     +'<p class="lead">수능 성적표를 들고 가, 나, 다군에 한 곳씩 지원했다. 수능 평균 '+g1(S.csat.avg)+'등급.</p>'+appList(f.jeongsi,['가군','나군','다군'])
     +'<p class="res-t">'+(f.jb?'「'+S.major+'」 '+f.jb+' 지원 대학에 합격했다.':'세 곳 모두 합격하지 못했다.')+'</p>'+nextBtn+'</section>';
   if(p==='jobres'){
     const o=f.lv!=='none'?outcome():null;
-    return'<section class="sheet">'+shd('채용 결과','3학년 12월')
+    return sheetOpen()+shd('채용 결과','3학년 12월')
       +'<p class="lead">문자 알림이 울렸다. 화면을 켜기 전에 숨을 한 번 골랐다.</p>'
       +'<p class="stamp '+(o?'ok':'no')+'">'+(o?'최종 합격':'불합격')+'</p>'
       +'<p class="res-t">'+(o?S.job.n+' 분야, '+o.s+'. '+(S.cert===2?S.job.c+' 자격증과 실습 기록이 힘이 됐다.':'자격증은 아직 없지만 실습 태도와 면접 준비가 통했다.'):'이번 채용에서는 합격하지 못했다. 선생님은 졸업 뒤에도 이어지는 길이 여럿 있다고 했다.')+'</p>'+nextBtn+'</section>';
   }
-  if(p==='contract')return'<section class="sheet">'+shd('근로계약서','입사 전')
+  if(p==='contract')return sheetOpen()+shd('근로계약서','입사 전')
     +'<h3 class="q"><span class="qn">마지막 문제.</span>근로계약서를 받았다</h3><p class="lead">입사 전에 회사에서 계약서를 내밀었다. 임금, 근로 시간, 휴일이 적혀 있다.</p>'
     +'<div class="opts"><button class="opt" data-a="fchoose" data-v="0" data-k="opt-0"><span class="on" aria-hidden="true">①</span><span><span class="ot">항목을 하나씩 확인하고 모르는 것은 묻는다</span></span></button>'
     +'<button class="opt" data-a="fchoose" data-v="1" data-k="opt-1"><span class="on" aria-hidden="true">②</span><span><span class="ot">좋은 회사일 테니 바로 서명한다</span></span></button></div></section>';
   if(p==='fallback'){
     const o=f.kind==='college'?['1년 더 준비해 다시 도전한다','추가모집과 전문대학 전형을 알아본다','직업 훈련을 받으며 일을 먼저 시작한다']
       :['졸업 후에도 취업 지원 프로그램으로 구직을 이어 간다','전문대학에 진학해 기술을 더 배운다','자격증을 보완해 내년 상반기 채용에 다시 지원한다'];
-    return'<section class="sheet">'+shd('다음 걸음','졸업 전')
+    return sheetOpen()+shd('다음 걸음','졸업 전')
       +'<h3 class="q"><span class="qn">마지막 문제.</span>이제 어떻게 할까?</h3><p class="lead">이번에는 바라던 소식을 받지 못했다. 진로 선생님이 말했다. "결과가 끝은 아니야. 다음 걸음을 같이 정하자."</p>'
       +'<div class="opts">'+o.map((t,i)=>'<button class="opt" data-a="fchoose" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+t+'</span></span></button>').join('')+'</div></section>';
   }
   const o=outcome();
-  return'<section class="sheet">'+shd('졸업식','3학년 2월')
+  return sheetOpen()+shd('졸업식','3학년 2월')
     +(f.note?'<div class="prevres"><span>'+f.note+'</span></div>':'')
     +'<p class="lead">강당에는 3년 전 입학식 때와 같은 의자가 놓여 있다. 그때는 발이 바닥에 닿는지 신경 쓰였는데, 오늘은 옆자리 친구 얼굴이 먼저 보인다.</p>'
     +'<p class="lead">'+(S.stats.rel>=60?'꽃다발보다 사진을 같이 찍자는 친구가 더 많았다. ':'')+'졸업 후의 길: <b>'+o.h+'</b>. '+o.s+'.</p>'
@@ -882,7 +1239,7 @@ function vEnding(){
   const flowS=S.exams.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('');
   const flowM=S.mocks.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('')+(S.csat?'<i>수능<b>'+g1(S.csat.avg)+'</b></i>':'');
   const recs=S.recs.length?S.recs.map(r=>'<li>'+r.y+'학년 '+r.cat+': '+r.text+'</li>').join(''):'<li>남은 기록이 없다.</li>';
-  return'<main class="wrap"><section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
+  return'<main class="wrap">'+banner('hall:졸업식','happy',1)+'<section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
     +'<p>위 학생은 ASGS에서 3년의 과정을 모두 마쳤으므로 이 졸업장을 수여합니다.</p><span class="seal">ASGS</span></section>'
     +'<section class="sheet"><h2 class="h3">졸업 후의 길</h2><p class="big">'+o.h+'</p><p class="big-s">'+o.s+'</p>'
     +'<p class="muted">희망 분야: '+F[g].n+(S.flags.changed?' (2학년 때 방향을 바꿨다)':'')+'</p></section>'
@@ -951,7 +1308,11 @@ const H={
   resume(){const sv=loadSave();if(sv){S=sv;UI.screen='game';prev=null;render(true);}},
   sel(v){UI.sel=v;render();},
   start(){const el=document.getElementById('nm');const nm=(el?el.value:UI.name).trim().slice(0,8);newGame(UI.sel,nm);save();render(true);},
-  pick(v){const i=S.picks.indexOf(v);if(i>=0)S.picks.splice(i,1);else if(S.picks.length<3)S.picks.push(v);render();},
+  pick(v){const i=S.picks.indexOf(v);if(i>=0)S.picks.splice(i,1);else if(S.picks.length<3)S.picks.push(v);
+    const app=document.getElementById('app'),sl=app.querySelector('.slots');if(!sl){render();return;}
+    sl.innerHTML=slotsHtml();
+    app.querySelectorAll('.actc').forEach(b=>{const on=S.picks.includes(b.dataset.v);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.disabled=S.picks.length>=3&&!on;});
+    const go=app.querySelector('[data-a="go"]');if(go)go.disabled=S.picks.length<3;},
   go(){if(S.picks.length<3)return;runPlan();save();render(true);},
   burn(){runBurn();save();render(true);},
   choose(v){choose(+v);save();render(true);},
