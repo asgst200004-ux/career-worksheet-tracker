@@ -25,4 +25,4 @@
 
 ## 그림 파일
 
-`img/` 폴더에 하린 그림 4장(`harin-smile`, `harin-happy`, `harin-tired`, `harin-worry`)이 있습니다. `index.html`과 `img` 폴더를 같은 곳에 두어야 그림이 나옵니다. 도윤 그림은 아직 코드로 그린 그림을 씁니다.
+`img/` 폴더에 하린 그림 4장(`harin-*`)과 도윤 그림 4장(`doyun-*`)이 있습니다. 표정은 smile(기본), happy(기쁨), tired(지침), worry(걱정)입니다. `index.html`과 `img` 폴더를 같은 곳에 두어야 그림이 나옵니다.
