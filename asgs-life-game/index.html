@@ -1,0 +1,991 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>ASGS 고교 3년</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 구성: 위에는 칠판(상태판), 아래에는 시험지 한 장. 선택지는 객관식 보기 ①②③, 결과는 빨간펜으로 표시한다. */
+:root{
+  --paper:#EDF1EA; --grid:#DFE6DD; --sheet:#FFFFFF; --ink:#1C2826; --muted:#586964; --line:#C9D4CC;
+  --board:#1F4338; --board-hi:#2F5A4C; --chalk:#F2F5EB; --chalk-dim:#A9C0B3; --wood:#9B6B3D;
+  --hl:#FFE169; --hl-ink:#33290A; --red:#C93A20; --good:#1B7548;
+  --av-bg:#D7E5DC; --av-uni:#2D466A;
+  --f-display:'Gaegu','Nanum Pen Script','Apple SD Gothic Neo','Malgun Gothic',cursive;
+  --f-body:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#101B17; --grid:#162520; --sheet:#1A2A24; --ink:#EBEFE3; --muted:#9DB0A5; --line:#2F463D;
+    --board:#0B1512; --board-hi:#22382F; --chalk:#F2F5EB; --chalk-dim:#8FA79A; --wood:#6B4A2A;
+    --hl:#FFE169; --hl-ink:#33290A; --red:#FF8D73; --good:#72D6A3;
+    --av-bg:#2A4238; --av-uni:#4B6C9E; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101B17; --grid:#162520; --sheet:#1A2A24; --ink:#EBEFE3; --muted:#9DB0A5; --line:#2F463D;
+  --board:#0B1512; --board-hi:#22382F; --chalk:#F2F5EB; --chalk-dim:#8FA79A; --wood:#6B4A2A;
+  --hl:#FFE169; --hl-ink:#33290A; --red:#FF8D73; --good:#72D6A3;
+  --av-bg:#2A4238; --av-uni:#4B6C9E; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;
+  -webkit-text-size-adjust:100%;word-break:keep-all;overflow-wrap:anywhere;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--board)}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--hl);outline-offset:2px}
+h1,h2,h3,h4,p,ul,ol,dl,dd{margin:0}
+ul,ol{padding:0;list-style:none}
+i{font-style:normal}
+.wrap{max-width:560px;margin:0 auto;padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
+.muted{color:var(--muted);font-size:14px}
+.up{color:var(--good)} .dn{color:var(--red)}
+
+/* 칠판 */
+.bb{background:var(--board);color:var(--chalk);border:8px solid var(--wood);border-radius:4px;padding:22px 20px 26px;display:flex;flex-direction:column;gap:14px}
+.bb-date{font-family:var(--f-display);font-size:18px;color:var(--chalk-dim);align-self:flex-end}
+.bb-title{font-family:var(--f-display);font-weight:700;font-size:clamp(46px,14vw,76px);line-height:1.05;text-wrap:balance}
+.bb-title span{color:var(--hl)}
+.bb-sub{font-family:var(--f-display);font-size:22px;line-height:1.4;color:var(--chalk)}
+.bb-btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:block;width:100%;border:0;border-radius:3px;background:var(--ink);color:var(--sheet);padding:14px 16px;font-weight:700;font-size:16px;text-align:center}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn.chalk{background:var(--hl);color:var(--hl-ink);width:auto;flex:1 1 150px}
+.btn.ghost{background:transparent;color:var(--chalk);border:2px dashed var(--chalk-dim);width:auto;flex:1 1 150px}
+.btn.line{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.textbtn{background:none;border:0;color:var(--muted);font-size:14px;text-decoration:underline;text-underline-offset:3px;align-self:center;padding:8px}
+
+/* 시험지 */
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:18px 16px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 0 var(--line),3px 4px 0 var(--grid)}
+.shd{display:flex;align-items:stretch;border:1.5px solid var(--ink);border-radius:2px}
+.shd-m{flex:none;padding:6px 10px;border-right:1.5px solid var(--ink);font-size:13px;font-weight:700;display:flex;align-items:center;font-variant-numeric:tabular-nums}
+.shd h2{flex:1;min-width:0;padding:6px 10px;font-size:17px;font-weight:700;display:flex;align-items:center}
+.lead{font-size:16px}
+.q{font-size:16px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline}
+.q .qn{font-family:var(--f-display);font-size:22px;line-height:1}
+.q em{font-style:normal;font-size:13px;font-weight:500;color:var(--muted)}
+.note{font-size:14px;border:1px dashed var(--line);border-radius:3px;padding:8px 10px;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.note b{font-weight:700}
+.note.warn{border-color:var(--red);color:var(--red)}
+.h3{font-size:15px;font-weight:700;border-bottom:1.5px solid var(--ink);padding-bottom:4px}
+
+/* 계획 */
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.slot{border:1.5px dashed var(--line);border-radius:3px;padding:6px 4px;font-size:13px;text-align:center;color:var(--muted);min-height:34px;display:flex;align-items:center;justify-content:center}
+.slot.on{border-style:solid;border-color:var(--hl-ink);background:var(--hl);color:var(--hl-ink);font-weight:700}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.actc{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 8px;align-items:start;text-align:left;background:var(--sheet);border:1.5px solid var(--line);border-radius:3px;padding:9px 9px 8px}
+.actc .ic{grid-row:span 3;font-size:22px;line-height:1.2}
+.actc .an{font-weight:700;font-size:15px;line-height:1.3}
+.actc .ad{font-size:12px;color:var(--muted);line-height:1.35}
+.actc .af{font-size:11.5px;line-height:1.5;margin-top:3px;display:flex;flex-wrap:wrap;gap:0 6px}
+.actc.on{background:var(--hl);border-color:var(--hl-ink);color:var(--hl-ink)}
+.actc.on .ad,.actc.on .af i{color:var(--hl-ink)}
+.actc:disabled{opacity:.45;cursor:not-allowed}
+
+/* 보기 */
+.opts{display:flex;flex-direction:column;border-top:1px dashed var(--line)}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start;text-align:left;background:none;border:0;border-bottom:1px dashed var(--line);padding:12px 4px;font-size:15.5px;line-height:1.5}
+.opt .on{font-size:19px;line-height:1.25}
+.opt .ot{background:linear-gradient(transparent 62%,var(--hl) 62%) no-repeat;background-size:0 100%;transition:background-size .18s}
+.opt:hover .ot,.opt:focus-visible .ot{background-size:100% 100%}
+.tag{font-style:normal;font-size:11.5px;font-weight:700;color:var(--red);border:1px solid var(--red);border-radius:2px;padding:0 5px;margin-left:4px;white-space:nowrap}
+
+/* 결과 */
+.dl{display:inline-flex;flex-wrap:wrap;gap:5px}
+.d{font-size:12.5px;font-weight:700;padding:1px 8px;border:1px solid currentColor;border-radius:999px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.done{font-size:14px;display:flex;flex-direction:column;gap:6px;background:var(--sheet);border:1px solid var(--line);border-radius:3px;padding:10px 12px}
+.done b{font-weight:700}
+.res{display:flex;flex-direction:column;gap:6px}
+.res-q{font-size:13px;color:var(--muted)}
+.res-t{font-size:16px}
+.prevres{font-size:14.5px;border-left:3px solid var(--red);padding-left:10px;display:flex;flex-direction:column;gap:6px}
+.exam{border:1.5px solid var(--ink);border-radius:2px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.exam h4{font-size:15px;font-weight:700;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.exam h4 small{font-size:12px;font-weight:500;color:var(--muted)}
+.gt{width:100%;border-collapse:collapse;font-size:14.5px}
+.gt th{text-align:left;font-weight:500;padding:4px 0;border-bottom:1px dotted var(--line)}
+.gt td{text-align:right;padding:4px 0;border-bottom:1px dotted var(--line);font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.gt small,.gc small{font-size:11px;font-weight:500;color:var(--muted);margin-left:1px}
+.gcells{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.gc{border:1px solid var(--line);border-radius:2px;padding:6px 4px;text-align:center;font-size:12.5px;display:flex;flex-direction:column}
+.gc b{font-size:19px;font-variant-numeric:tabular-nums}
+.avg{font-size:15px;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center}
+.circ{display:inline-block;font-family:var(--f-display);font-size:26px;line-height:1;color:var(--red);border:2.5px solid var(--red);border-radius:50%;padding:5px 12px 3px;transform:rotate(-6deg);margin:0 2px}
+.avg span{font-size:13px;font-weight:700}
+.stamp{align-self:flex-start;font-family:var(--f-display);font-size:26px;line-height:1;font-weight:700;border:3px solid currentColor;border-radius:4px;padding:6px 12px 3px;transform:rotate(-4deg)}
+.stamp.ok{color:var(--red)} .stamp.no{color:var(--muted)}
+.recnew{font-size:14px;border-top:1px dashed var(--line);padding-top:10px}
+.recnew li{padding-left:14px;position:relative}
+.recnew li::before{content:"";position:absolute;left:2px;top:.72em;width:6px;height:2px;background:var(--red)}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.kv div{border:1px solid var(--line);border-radius:2px;padding:8px 6px;text-align:center}
+.kv dt{font-size:12px;color:var(--muted)}
+.kv dd{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.apps{display:flex;flex-direction:column}
+.apps li{display:flex;flex-wrap:wrap;gap:2px 10px;justify-content:space-between;align-items:baseline;padding:7px 2px;border-bottom:1px dotted var(--line);font-size:14.5px}
+.apps li b{font-weight:700}
+.apps li.ok b{color:var(--red)}
+.apps li.no b{color:var(--muted);font-weight:500}
+.apps small{flex-basis:100%;font-size:12px;color:var(--muted)}
+
+/* 상태판 */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--board);color:var(--chalk);border-bottom:6px solid var(--wood)}
+.hud-in{max-width:560px;margin:0 auto;padding-block:9px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
+.hud-top{display:flex;align-items:center;gap:10px}
+.hud-av{flex:none;display:flex}
+.hud-id{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.hud-id b{font-family:var(--f-display);font-size:21px;font-weight:700}
+.hud-id span{font-size:12.5px;color:var(--chalk-dim)}
+.hud-btn{flex:none;display:flex;gap:6px}
+.hud-btn button{background:none;border:1.5px solid var(--chalk-dim);border-radius:3px;color:var(--chalk);font-size:13px;padding:5px 9px}
+.ticks{display:flex;gap:2px}
+.ticks i{flex:1;height:5px;background:var(--board-hi)}
+.ticks i.pd{background:var(--chalk-dim)}
+.ticks i.cu{background:var(--hl)}
+.ticks i.ys{margin-left:6px}
+.gauges{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.gg{display:flex;flex-direction:column;gap:1px;min-width:0}
+.gg.sep{border-left:1px dashed var(--board-hi);padding-left:6px}
+.gg span{font-size:11.5px;color:var(--chalk-dim);line-height:1.2}
+.gg b{font-size:16px;line-height:1.2;font-variant-numeric:tabular-nums}
+.gg .bar{height:4px;background:var(--board-hi);display:block}
+.gg .bar i{display:block;height:100%;background:var(--chalk);transition:width .5s}
+.gg.low b{color:#FF9B85} .gg.low .bar i{background:#FF9B85}
+.gg.chg b{animation:flash 1s}
+@keyframes flash{0%,40%{color:var(--hl)}}
+
+/* 캐릭터 */
+.chars{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.charc{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;background:var(--sheet);border:2px solid var(--line);border-radius:3px;padding:14px 10px}
+.charc.on{border-color:var(--ink);box-shadow:inset 0 -8px 0 var(--hl)}
+.charc .cl{font-size:12px;color:var(--muted)}
+.charc .cn{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1}
+.charc .ct{font-size:14px;font-weight:700}
+.charc .cd{font-size:13px;color:var(--muted);line-height:1.5;text-align:left}
+.field{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:700}
+.field input{font:inherit;font-weight:400;font-size:16px;color:var(--ink);background:var(--sheet);border:1.5px solid var(--ink);border-radius:3px;padding:10px 12px;width:100%}
+.how{display:flex;flex-direction:column;gap:8px;counter-reset:how}
+.how li{counter-increment:how;display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:15px}
+.how li::before{content:counter(how);font-family:var(--f-display);font-size:24px;line-height:1.1;font-weight:700;color:var(--red)}
+.how b{font-weight:700}
+
+/* 모달 */
+.scrim{position:fixed;inset:0;z-index:20;background:rgba(10,20,16,.55);display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--sheet);color:var(--ink);width:100%;max-width:560px;max-height:86%;overflow:auto;border-radius:6px 6px 0 0;border-top:6px solid var(--wood);padding:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+.modal-hd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.modal-hd h2{font-family:var(--f-display);font-size:26px;font-weight:700;line-height:1.1}
+.modal-hd button{background:none;border:1.5px solid var(--ink);border-radius:3px;padding:4px 12px;font-size:14px}
+.rows{display:flex;flex-direction:column;font-size:14.5px}
+.rows li{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:8px;padding:6px 0;border-bottom:1px dotted var(--line)}
+.rows li span:first-child{color:var(--muted);font-size:13px}
+.glist{display:flex;flex-direction:column;font-size:14px}
+.glist li{padding:7px 0;border-bottom:1px dotted var(--line);display:flex;flex-direction:column}
+.glist li b{font-weight:700;display:flex;justify-content:space-between;gap:8px}
+.glist li small{font-size:12.5px;color:var(--muted)}
+
+/* 졸업 */
+.diploma{background:var(--sheet);border:3px double var(--ink);border-radius:2px;padding:26px 18px 22px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;position:relative}
+.diploma h1{font-family:var(--f-display);font-size:46px;font-weight:700;letter-spacing:.3em;margin-right:-.3em;line-height:1.1}
+.diploma .dn-name{font-size:20px;font-weight:700}
+.diploma p{font-size:15px;max-width:22em}
+.diploma .seal{font-family:var(--f-display);font-weight:700;font-size:17px;line-height:1;color:var(--red);border:2.5px solid var(--red);border-radius:50%;width:62px;height:62px;display:flex;align-items:center;justify-content:center;transform:rotate(-10deg);margin-top:2px}
+.big{font-family:var(--f-display);font-size:30px;font-weight:700;line-height:1.2;text-wrap:balance}
+.big-s{font-size:14.5px;color:var(--muted)}
+.statrows{display:flex;flex-direction:column;gap:7px}
+.statrows li{display:grid;grid-template-columns:2.6em minmax(0,1fr) 5.4em;gap:8px;align-items:center;font-size:14px}
+.statrows .bar{height:8px;background:var(--grid);position:relative;display:block}
+.statrows .bar i{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+.statrows .bar u{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--red)}
+.statrows em{font-style:normal;text-align:right;font-variant-numeric:tabular-nums;font-size:13px}
+.flow{display:flex;flex-wrap:wrap;gap:5px}
+.flow i{font-size:12.5px;border:1px solid var(--line);border-radius:2px;padding:2px 6px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.flow i b{font-weight:700;margin-left:4px}
+.reflect{display:flex;flex-direction:column;gap:10px;counter-reset:rq}
+.reflect li{counter-increment:rq;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:15px}
+.reflect li::before{content:counter(rq) ".";font-weight:700}
+.copybox{width:100%;min-height:150px;font:inherit;font-size:13px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:8px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px}
+.btnrow .btn{flex:1 1 160px;width:auto}
+@media (max-width:359px){.acts{grid-template-columns:1fr}.hud-btn button{padding:4px 6px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript>이 게임은 자바스크립트를 켜야 실행됩니다.</noscript>
+<script>
+(function(){
+'use strict';
+const SAVE_KEY='asgs3y-v1';
+let S=null, prev=null;
+const UI={screen:'title',sel:'f',name:'',modal:null,copy:''};
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const g1=v=>v.toFixed(1);
+
+/* ---------- 자료 ---------- */
+const FKEYS=['hum','sci','med','biz','edu','art'];
+const F={
+  hum:{n:'인문·사회',club:'시사토론반',cd:'사회 이슈를 읽고 토론한다',y2:['세계사','세계시민과 지리'],y3:['정치','법과 사회'],
+    topic:'지역 신문 기사에 나타난 청소년의 모습 분석',majors:['국어국문학과','사학과','정치외교학과','미디어커뮤니케이션학과'],
+    jobs:[{n:'사무·행정 지원',c:'컴퓨터활용능력 2급'},{n:'호텔·관광 서비스',c:'호텔서비스사'},{n:'출판·편집 디자인',c:'전자출판기능사'}]},
+  sci:{n:'자연·공학·IT',club:'과학탐구반',cd:'실험하고 탐구 보고서를 쓴다',y2:['물리학','정보'],y3:['역학과 에너지','인공지능 기초'],
+    topic:'교실 미세먼지 농도와 환기 시간의 관계 측정',majors:['컴퓨터공학과','기계공학과','화학공학과','건축학과'],
+    jobs:[{n:'소프트웨어 개발',c:'정보처리기능사'},{n:'전기 설비',c:'전기기능사'},{n:'자동차 정비',c:'자동차정비기능사'}]},
+  med:{n:'보건·의료',club:'보건·생명반',cd:'건강 캠페인을 하고 생명과학을 공부한다',y2:['생명과학','화학'],y3:['세포와 물질대사','생물의 유전'],
+    topic:'청소년 수면 시간과 오전 수업 집중도 설문 조사',majors:['간호학과','물리치료학과','임상병리학과','생명과학과'],
+    jobs:[{n:'간호조무',c:'간호조무사'},{n:'병원 원무·접수',c:'컴퓨터활용능력 2급'},{n:'피부 관리',c:'미용사(피부)'}]},
+  biz:{n:'경영·경제',club:'경제·창업반',cd:'모의 투자를 하고 창업 아이템을 기획한다',y2:['경제','확률과 통계'],y3:['경제 수학','국제 관계의 이해'],
+    topic:'학교 매점 인기 상품의 가격과 판매량 관계 조사',majors:['경영학과','경제학과','회계학과','국제통상학과'],
+    jobs:[{n:'회계·세무 사무',c:'전산회계 2급'},{n:'매장·유통 관리',c:'유통관리사 3급'},{n:'온라인 쇼핑몰 운영',c:'전자상거래운용사'}]},
+  edu:{n:'교육·복지',club:'또래상담반',cd:'친구 고민을 듣고 멘토링을 한다',y2:['사회와 문화','현대사회와 윤리'],y3:['윤리와 사상','인문학과 윤리'],
+    topic:'또래 멘토링이 수학 불안에 주는 영향 조사',majors:['교육학과','초등교육과','사회복지학과','상담심리학과'],
+    jobs:[{n:'돌봄·복지 서비스',c:'요양보호사'},{n:'교육 서비스 운영 지원',c:'컴퓨터활용능력 2급'},{n:'스포츠 강습',c:'생활스포츠지도사 2급'}]},
+  art:{n:'예술·체육',club:'영상·디자인반',cd:'학교 행사를 촬영하고 콘텐츠를 만든다',y2:['문학과 영상','매체 의사소통'],y3:['미디어 영어','소프트웨어와 생활'],
+    topic:'짧은 영상의 첫 3초 편집 방식 비교',majors:['시각디자인학과','영상학과','실용음악과','스포츠과학과'],
+    jobs:[{n:'영상 편집·콘텐츠 제작',c:'컴퓨터그래픽기능사'},{n:'헤어 미용',c:'미용사(일반)'},{n:'제과·제빵',c:'제과기능사'}]}
+};
+const CHARS={
+  f:{name:'하린',label:'여학생',line:'먼저 손드는 행동파',desc:'몸으로 부딪히며 배운다. 친구가 많고 운동을 좋아한다. 책상 앞에 오래 앉아 있는 건 아직 어렵다.',
+    st:{ns:44,sn:42,act:8,car:12,rel:62,hp:68,mind:58}},
+  m:{name:'도윤',label:'남학생',line:'조용히 파고드는 관찰자',desc:'혼자 읽고 정리하는 시간을 좋아한다. 성적은 안정적인 편이지만 여러 사람 앞에 서면 긴장한다.',
+    st:{ns:52,sn:48,act:8,car:14,rel:44,hp:52,mind:56}}
+};
+const STN={ns:'내신',sn:'수능',skill:'직무',act:'활동',car:'진로',rel:'관계',hp:'체력',mind:'마음'};
+const GROW=['ns','sn','act','car','rel','skill'];
+const CIRC='①②③④⑤⑥⑦⑧';
+const TRACKN={jonghap:'학생부종합전형',gyogwa:'학생부교과전형',jeongsi:'수능 위주 전형(정시)'};
+
+const CAL12=[
+  {m:'3월',n:'새 학기'},
+  {m:'4월',n:'1학기 중간고사',ex:['school','1학기 중간고사']},
+  {m:'6월',n:'6월 모의고사',ex:['mock','6월 학력평가']},
+  {m:'7월',n:'1학기 기말고사',ex:['school','1학기 기말고사']},
+  {m:'8월',n:'여름방학',vac:1},
+  {m:'10월',n:'2학기 중간고사',ex:['school','2학기 중간고사'],ex2:['mock','10월 학력평가']},
+  {m:'12월',n:'2학기 기말고사',ex:['school','2학기 기말고사']},
+  {m:'1월',n:'겨울방학',vac:1}
+];
+const CAL3C=[
+  {m:'3월',n:'고3의 시작',ex:['mock','3월 학력평가']},
+  {m:'5월',n:'1학기 중간고사',ex:['school','1학기 중간고사']},
+  {m:'6월',n:'6월 모의평가',ex:['mock','6월 모의평가']},
+  {m:'7월',n:'1학기 기말고사',ex:['school','1학기 기말고사']},
+  {m:'8월',n:'여름방학',vac:1},
+  {m:'9월',n:'수시 원서접수',ex:['mock','9월 모의평가']},
+  {m:'11월',n:'대학수학능력시험',ex:['csat','대학수학능력시험']},
+  {m:'2월',n:'합격 발표와 졸업',fin:1}
+];
+const CAL3J=[
+  {m:'3월',n:'위탁 교육 시작'},
+  {m:'5월',n:'자격증 필기시험',ex:['certW']},
+  {m:'6월',n:'실습 프로젝트'},
+  {m:'7월',n:'자격증 실기시험',ex:['certP']},
+  {m:'8월',n:'여름방학',vac:1},
+  {m:'9월',n:'채용 지원',ex:['certF']},
+  {m:'11월',n:'면접'},
+  {m:'2월',n:'취업 결과와 졸업',fin:1}
+];
+const ACTS=[
+  {id:'study',ic:'📘',n:'교과 공부',d:'수업 복습과 학교 시험 대비',fx:{ns:6,sn:2,hp:-3,mind:-3},when:c=>!c.job3},
+  {id:'mock',ic:'✏️',n:'모의고사 공부',d:'수능 유형 문제 풀이',fx:{sn:6,ns:2,hp:-3,mind:-3},when:c=>!c.job3},
+  {id:'practice',ic:'🛠️',n:'직무 실습',d:'교육기관 실습 과제',fx:{skill:7,hp:-3,mind:-1},when:c=>c.job3},
+  {id:'cert',ic:'📄',n:'자격증 공부',d:'필기 이론과 실기 연습',fx:{skill:5,car:1,mind:-3},when:c=>c.job3},
+  {id:'report',ic:'🔎',n:'수행평가·탐구',d:'보고서와 발표 준비',fx:{ns:3,act:4,car:1,mind:-2},when:c=>!c.vac&&!c.job3&&!(c.y===3&&c.s>=4)},
+  {id:'club',ic:'🎪',n:'동아리 활동',d:'',fx:{act:5,rel:3,car:1,hp:-1},when:c=>!c.vac&&c.y<3&&c.t>0},
+  {id:'career',ic:'🧭',n:'진로 탐색',d:'직업·학과 정보, 진로 상담',fx:{car:6,act:1}},
+  {id:'iv',ic:'🎤',n:'면접·학생부 점검',d:'학생부 읽기, 예상 질문 답하기',fx:{car:3,act:1,mind:-1},when:c=>c.y===3&&!c.job3&&c.s>=3},
+  {id:'jobprep',ic:'💼',n:'취업 준비',d:'이력서, 채용 정보, 면접 연습',fx:{car:4,rel:1},when:c=>c.job3&&c.s>=3},
+  {id:'read',ic:'📚',n:'독서',d:'관심 분야 책 읽기',fx:{sn:2,car:2,mind:2,act:1}},
+  {id:'vol',ic:'🤲',n:'봉사활동',d:'학교와 지역에서 4시간',fx:{act:3,rel:3,mind:1,hp:-2},when:c=>!(c.y===3&&c.s>=4)},
+  {id:'camp',ic:'🏕️',n:'진로 체험',d:'캠프, 전공·직업 체험',fx:{car:7,act:3,hp:-1},when:c=>c.vac},
+  {id:'intensive',ic:'🔥',n:'방학 집중 학습',d:'특강과 자습으로 몰아서',fx:{ns:5,sn:5,hp:-4,mind:-4},when:c=>c.vac&&!c.job3},
+  {id:'sport',ic:'🏃',n:'운동',d:'체력이 있어야 버틴다',fx:{hp:8,mind:2}},
+  {id:'friend',ic:'🍜',n:'친구와 놀기',d:'떡볶이, 노래방, 수다',fx:{rel:6,mind:3,hp:-1}},
+  {id:'rest',ic:'🛌',n:'푹 쉬기',d:'잠, 취미, 아무것도 안 하기',fx:{mind:7,hp:6}}
+];
+const ACT={};ACTS.forEach(a=>ACT[a.id]=a);
+const HAPS=[
+  {t:'환절기 감기에 걸려 며칠을 앓았다.',fx:{hp:-6}},
+  {t:'수업 시간 발표를 선생님이 칭찬해 주셨다.',fx:{mind:4}},
+  {t:'새벽까지 짧은 영상을 보다가 며칠 동안 잠이 부족했다.',fx:{hp:-4,ns:-1}},
+  {t:'급식에 좋아하는 메뉴가 나왔다.',fx:{mind:3}},
+  {t:'친구가 고민을 털어놓았다. 끝까지 들어 주었다.',fx:{rel:4}},
+  {t:'성적 문제로 집에서 말다툼을 했다.',fx:{mind:-5}},
+  {t:'도서관에서 우연히 집어 든 책이 오래 마음에 남았다.',fx:{car:3}},
+  {t:'체육 시간에 발목을 살짝 삐었다.',fx:{hp:-5}},
+  {t:'동아리 선배가 자기 진로 이야기를 들려주었다.',fx:{car:3,rel:1}},
+  {t:'단짝과 사소한 오해가 생겼다.',fx:{rel:-4,mind:-2}},
+  {t:'꾸준히 쓴 플래너가 한 권을 다 채웠다.',fx:{mind:3,ns:1}}
+];
+const TYPES={
+  balance:{n:'균형을 지킨 사람',d:'공부, 활동, 사람, 건강 가운데 어느 하나도 놓지 않았다. 눈에 띄는 한 방은 없어도 무너지지 않는 3년이었다.',tip:'균형을 잡는 힘은 어떤 진로에서도 오래 버티게 해 준다.'},
+  explorer:{n:'깊이 파는 탐구가',d:'궁금한 것을 따라 동아리와 탐구, 진로 활동을 이어 붙였다. 학생부에는 한 줄로 꿰어지는 이야기가 남았다.',tip:'관심을 기록으로 남기는 습관이 가장 큰 자산이다.'},
+  scholar:{n:'꾸준한 노력가',d:'시험 기간에도 방학에도 책상을 지켰다. 성적표가 그 시간을 증명한다.',tip:'공부하는 힘은 길렀다. 이제 그 힘을 어디에 쓸지 정할 차례다.'},
+  people:{n:'사람 부자',d:'체육대회에도 축제에도 쉬는 시간에도 곁에 친구가 있었다. 3년 동안 가장 크게 자란 것은 관계다.',tip:'사람과 함께 일하는 능력은 시험으로 잴 수 없는 실력이다.'},
+  care:{n:'나를 돌볼 줄 아는 사람',d:'지칠 때 멈출 줄 알았고 몸과 마음을 먼저 챙겼다. 덕분에 끝까지 건강하게 졸업한다.',tip:'자기 관리가 되는 사람은 출발이 늦어도 멀리 간다.'},
+  late:{n:'뒷심의 주인공',d:'첫 시험 성적표와 마지막 성적표가 전혀 다르다. 올라가는 방향으로 3년을 보냈다.',tip:'성장한 경험은 다음 도전의 근거가 된다.'},
+  maker:{n:'손으로 길을 낸 사람',d:'교실 밖에서 기술을 배우고 자격을 갖췄다. 친구들보다 먼저 일의 세계에 들어선다.',tip:'일하면서 대학에 가는 길(재직자 특별전형 등)도 열려 있다.'},
+  seeker:{n:'아직 길을 찾는 여행자',d:'3년 동안 뚜렷한 답을 찾지는 못했다. 그래도 해 본 것과 해 보지 않은 것이 구분되기 시작했다.',tip:'진로는 한 번에 정하는 것이 아니다. 스무 살의 탐색도 탐색이다.'}
+};
+
+/* ---------- 상태 ---------- */
+const year=()=>Math.floor(S.t/8)+1;
+const slot=()=>S.t%8;
+function cal(){const y=year(),s=slot();if(y<3)return CAL12[s];return(S.path==='job'?CAL3J:CAL3C)[s];}
+function ctx(){const c=cal();return{y:year(),s:slot(),t:S.t,vac:!!c.vac,job3:year()===3&&S.path==='job'};}
+function topInt(){let b=FKEYS[0];FKEYS.forEach(k=>{if(S.int[k]>S.int[b])b=k;});return b;}
+const aim=()=>S.goal||topInt();
+function add(t,d){for(const k in d)t[k]=(t[k]||0)+d[k];return t;}
+function apply(fx,o){
+  o=o||{};const out={};
+  for(const k in fx){
+    if(!(k in S.stats))continue;
+    let d=fx[k];
+    if(d>0&&GROW.includes(k)&&!o.raw){const base=d;d*=(1-S.stats[k]/110);if(o.tired&&k!=='rel')d*=0.6;d=Math.round(d);if(base>=4)d=Math.max(1,d);}
+    const b=S.stats[k];S.stats[k]=clamp(Math.round(b+d),0,100);
+    if(S.stats[k]!==b)out[k]=S.stats[k]-b;
+  }
+  return out;
+}
+function rec(cat,text){const r={y:year(),cat,text};S.recs.push(r);S.newRecs.push(r);}
+function checkBurn(){if(S.stats.hp<=0||S.stats.mind<=0)S.burn=true;}
+
+function newGame(ch,name){
+  const C=CHARS[ch],st=Object.assign({skill:0},C.st);
+  S={v:1,ch,name:name||C.name,t:0,phase:'plan',step:0,stats:st,st0:Object.assign({},st),stY:Object.assign({},st),
+    int:{hum:0,sci:0,med:0,biz:0,edu:0,art:0},club:null,goal:null,path:null,major:null,job:null,track:null,strat:null,jstrat:null,
+    elect:{2:null,3:null},el3:null,y3subs:null,exams:[],mocks:[],csat:null,cert:0,recs:[],newRecs:[],cnt:{},flags:{},
+    picks:[],planFx:null,planNames:[],tired:false,hap:null,log:[],res:null,burn:false,burns:0,fin:null,fp:0};
+  UI.screen='game';startTurn();
+}
+function startTurn(){
+  S.picks=[];S.planFx=null;S.planNames=[];S.log=[];S.res=null;S.step=0;S.hap=null;S.newRecs=[];S.tired=false;
+  if(cal().fin){runFinal();return;}
+  if(S.t>0&&!S.burn&&Math.random()<0.35){const h=HAPS[Math.floor(Math.random()*HAPS.length)];S.hap={t:h.t,fx:apply(h.fx,{raw:true})};}
+  S.phase=S.burn?'burn':'plan';
+}
+function runPlan(){
+  const c=ctx(),tired=S.stats.hp<30||S.stats.mind<30,tot={};
+  S.picks.forEach(id=>{
+    const a=ACT[id];add(tot,apply(a.fx,{tired}));S.cnt[id]=(S.cnt[id]||0)+1;
+    if(id==='club'&&S.club)S.int[S.club]+=1;
+    if(id==='career'||id==='camp'||id==='read')S.int[aim()]+=id==='read'?0.5:1;
+  });
+  const drift=c.vac?{hp:4,mind:4,ns:-1,sn:-1,rel:-1}:{hp:-2,mind:c.y===3?-4:-3,ns:-2,sn:-2,rel:-1};
+  if(c.job3){delete drift.ns;delete drift.sn;}
+  add(tot,apply(drift,{raw:true}));
+  S.planFx=tot;S.tired=tired;S.planNames=S.picks.map(id=>ACT[id].n);
+  S.phase='event';S.step=0;checkBurn();
+}
+function runBurn(){
+  S.planFx=apply({hp:35,mind:35,ns:-3,sn:-3},{raw:true});S.planNames=['한 달 쉬어 가기'];
+  S.burn=false;S.burns++;S.phase='event';S.step=0;
+}
+
+/* ---------- 시험 ---------- */
+const g5=p=>p>=84?1:p>=66?2:p>=46?3:p>=28?4:5;
+function g9(p){const th=[90,80,70,58,46,35,25,15];for(let i=0;i<8;i++)if(p>=th[i])return i+1;return 9;}
+const condB=()=>(S.stats.hp-50)*0.1+(S.stats.mind-50)*0.1;
+function schoolSubs(){
+  const y=year();
+  if(y===1)return['공통국어','공통수학','공통영어','통합사회','통합과학'];
+  if(y===2)return['문학','대수','영어Ⅰ'].concat(F[S.elect[2]||aim()].y2);
+  return['독서와 작문','미적분Ⅰ','영어Ⅱ'].concat(S.y3subs||F[aim()].y3);
+}
+function elecAff(){
+  const y=year();
+  if(y===2)return S.elect[2]===aim()?4:0;
+  if(y===3)return S.el3==='fit'?-3:S.el3==='easy'?5:0;
+  return 0;
+}
+function runExam(ex){
+  const type=ex[0],title=ex[1],y=year();
+  if(type==='school'){
+    const base=S.stats.ns+condB()+rnd(-4,4);
+    const subs=schoolSubs().map((n,i)=>({n,g:g5(base+rnd(-7,7)+(i>=3?elecAff():0))}));
+    const e={kind:'school',y,title,subs,avg:mean(subs.map(s=>s.g)),prev:S.exams.length?S.exams[S.exams.length-1].avg:null};
+    S.exams.push(e);return e;
+  }
+  if(type==='mock'||type==='csat'){
+    const base=S.stats.sn+condB()*(type==='csat'?1.5:1)+rnd(-4,4);
+    const subs=['국어','수학','영어','탐구'].map(n=>({n,g:g9(base+rnd(-7,7))}));
+    const e={kind:type,y,title,subs,avg:mean(subs.map(s=>s.g)),prev:S.mocks.length?S.mocks[S.mocks.length-1].avg:null};
+    if(type==='csat')S.csat=e;else S.mocks.push(e);return e;
+  }
+  const sk=S.stats.skill+rnd(-6,6),c=S.job.c;
+  if(type==='certW'){
+    const ok=sk>=28;if(ok)S.cert=1;
+    return{kind:'cert',title:c+' 필기시험',ok,msg:ok?'필기에 합격했다. 실기시험 응시 자격을 얻었다.':'필기에서 떨어졌다. 다음 회차에 다시 응시한다.'};
+  }
+  if(type==='certP'){
+    if(S.cert===1){const ok=sk>=48;if(ok){S.cert=2;rec('진로활동','자격증 취득: '+c);}
+      return{kind:'cert',title:c+' 실기시험',ok,msg:ok?'실기까지 합격했다. 자격증을 손에 쥐었다.':'시간 안에 과제를 끝내지 못했다. 가을 시험에 다시 도전한다.'};}
+    const ok=sk>=30;if(ok)S.cert=1;
+    return{kind:'cert',title:c+' 필기시험 재응시',ok,msg:ok?'두 번째 필기에서 합격했다. 실기는 가을 시험으로 미뤘다.':'필기에서 다시 떨어졌다. 가을 시험을 준비한다.'};
+  }
+  if(type==='certF'){
+    if(S.cert===2)return null;
+    if(S.cert===1){const ok=sk>=50;if(ok){S.cert=2;rec('진로활동','자격증 취득: '+c);}
+      return{kind:'cert',title:c+' 가을 실기시험',ok,msg:ok?'가을 실기시험에 합격했다. 지원서에 자격증을 적을 수 있다.':'이번에도 실기에서 떨어졌다. 자격증 없이 지원서를 낸다.'};}
+    const ok=sk>=30;if(ok)S.cert=1;
+    return{kind:'cert',title:c+' 가을 필기시험',ok,msg:ok?'필기에 합격했다. 실기는 졸업 전에 한 번 더 기회가 있다.':'필기를 통과하지 못했다. 자격증 없이 지원서를 낸다.'};
+  }
+  return null;
+}
+function fitScore(){
+  const g=aim();let f=0;
+  if(S.elect[2]===g)f+=25;
+  if(S.el3==='fit')f+=25;
+  if(S.club===g)f+=15;
+  if(S.flags.topic)f+=15;
+  if(S.flags.sawCollege||S.flags.sawJob)f+=10;
+  return f+Math.min(10,S.int[g]);
+}
+function trackScores(){
+  const na=S.exams.length?(5-mean(S.exams.map(e=>e.avg)))/4*100:50;
+  const mk=S.csat?S.csat.avg:(S.mocks.length?S.mocks[S.mocks.length-1].avg:5);
+  const su=(9-mk)/8*100,fit=fitScore();
+  const iv=(S.flags.iv?5:0)+Math.min(4,(S.cnt.iv||0)*2)+(S.stats.rel-50)*0.04+(S.stats.mind-50)*0.04;
+  return{na,su,mk,fit,jonghap:0.5*na+0.18*S.stats.act+0.1*S.stats.car+0.17*fit+iv,gyogwa:0.92*na+0.08*S.stats.act,jeongsi:su};
+}
+const nsAvg=()=>S.exams.length?mean(S.exams.map(e=>e.avg)):null;
+const mkAvg=()=>S.mocks.length?mean(S.mocks.map(e=>e.avg)):null;
+
+/* ---------- 이달의 선택 ---------- */
+function intro(){
+  const job=S.path==='job';
+  const T={
+    '1-0':'ASGS 입학식. 새 교복은 아직 빳빳하고 교실에는 처음 보는 얼굴뿐이다. 3년이 오늘 시작된다.',
+    '1-1':'고등학교 첫 시험이 다가온다. 중학교 때보다 범위가 넓고, 처음으로 등급이 매겨진다.',
+    '1-2':'첫 전국연합학력평가를 본다. 전국에서 내 위치를 처음 확인하는 시험이다. 운동장에서는 체육대회 준비가 한창이다.',
+    '1-3':'기말고사와 수행평가 마감이 한 주에 몰렸다. 1학기 성적이 여기서 정해진다.',
+    '1-4':'첫 여름방학. 한 달 남짓한 시간을 내가 정한다.',
+    '1-5':'2학기 중간고사와 10월 학력평가가 이어진다. 내년 선택과목 수요 조사도 시작됐다.',
+    '1-6':'학교 축제와 동아리 발표회가 열린다. 그 뒤에는 1학년 마지막 시험이 기다린다.',
+    '1-7':'1학년이 끝났다. 진로 선생님과 상담 약속을 잡았다.',
+    '2-0':'2학년. 친구마다 시간표가 다르다. 쉬는 시간마다 이동 수업 교실을 찾아 복도를 오간다.',
+    '2-1':'내가 고른 선택과목의 첫 시험이다. 수강 인원이 적은 과목은 한 문제로 등급이 갈린다.',
+    '2-2':'6월 학력평가가 끝나면 주제 탐구 주간이다. 스스로 주제를 정하고 탐구해 발표한다.',
+    '2-3':'기말고사 직전, 3학년 선택과목 수강 신청 공지가 올라왔다.',
+    '2-4':'2학년 여름방학. 선배들은 이 방학에 방향을 잡아야 한다고 말한다.',
+    '2-5':'2학년 2학기. 졸업 후의 길을 정할 때가 왔다. 3학년 직업교육 위탁과정 신청도 지금 받는다.',
+    '2-6':'달력이 한 장 남았다. 예비 고3이라는 말이 들리기 시작한다.',
+    '2-7':job?'위탁과정 합격 통지를 받았다. 3월부터는 일주일의 대부분을 교육기관에서 보낸다.':'고3을 앞둔 겨울방학. 독서실 자리가 일찍 찬다.',
+    '3-0':job?'3학년. 학교 대신 위탁 교육기관으로 등교하는 날이 더 많다. '+(S.job?S.job.n:'')+' 과정이 시작됐다.':'고3 교실. 칠판 구석에 수능까지 남은 날짜가 적혀 있다. 3월 학력평가로 한 해를 시작한다.',
+    '3-1':job?(S.job?S.job.c:'자격증')+' 필기시험이 다가온다.':'학생부에 반영되는 내신 시험은 이제 두 번 남았다.',
+    '3-2':job?'과정의 절반이 지났다. 직접 결과물을 만드는 실습 프로젝트가 시작된다.':'6월 모의평가. 수능 출제 기관이 내는 시험이고 졸업생도 함께 본다.',
+    '3-3':job?'실기시험이 있는 달이다. 정해진 시간 안에 과제를 완성해야 한다.':'3학년 1학기 기말고사. 수시에 반영되는 마지막 내신이다.',
+    '3-4':job?'여름방학. 학교 취업 담당 선생님이 채용 정보를 보내 주기 시작했다.':'여름방학. 수시 원서접수가 한 달 앞이다. 수시는 여섯 번까지 지원할 수 있다.',
+    '3-5':job?'채용 공고가 올라온다. 지원할 곳을 골라야 한다.':'원서를 접수했다. 9월 모의평가가 끝나면 수능까지 두 달이다.',
+    '3-6':job?'서류 합격 문자를 받았다. 면접이 다가온다.':'수능까지 한 달. 교실이 조용하다.'
+  };
+  return T[year()+'-'+slot()]||'';
+}
+function evSteps(){
+  const y=year(),s=slot(),g=aim(),top=topInt(),job=S.path==='job';
+  const fieldOpts=(mk)=>FKEYS.map(k=>mk(k));
+  switch(y+'-'+s+(y===3&&job?'j':'')){
+  case '1-0':return[{title:'어느 동아리에 들어갈까?',text:'동아리 홍보 주간이다. 복도마다 포스터가 붙었고 선배들이 신입생을 불러 세운다. 1년 동안 활동할 동아리를 정해야 한다.',
+    opts:fieldOpts(k=>({t:F[k].club+' · '+F[k].cd,fx:{act:3,rel:2},run(){S.club=k;S.int[k]+=2;rec('동아리활동',F[k].club+' 가입');},res:'「'+F[k].club+'」에 들어갔다. 첫 모임에서 어색하게 자기소개를 했다.'}))}];
+  case '1-1':return[{title:'시험 2주 전, 어떻게 준비할까?',text:'시험 범위가 공지됐다. 교실 분위기가 달라졌다.',opts:[
+    {t:'과목별 계획표를 짜서 하루 분량을 지킨다',fx:{ns:4,mind:-1},res:'계획대로 되지 않는 날도 있었다. 그래도 무엇을 얼마나 했는지 눈에 보이니 덜 불안했다.'},
+    {t:'친구들과 스터디를 만들어 서로 설명해 준다',fx:{ns:3,rel:3},res:'설명하다 막히는 부분이 곧 내가 모르는 부분이었다.'},
+    {t:'평소대로 지내다가 전날 밤을 새운다',fx:{ns:1,hp:-6,mind:-3},res:'새벽 3시, 글자가 눈에 들어오지 않는다. 시험 시간에는 졸음과 싸워야 했다.'}]}];
+  case '1-2':return[{title:'체육대회에서 무엇을 할까?',text:'반 대항 체육대회. 반 티셔츠를 맞추고 종목별 선수를 뽑는다.',opts:[
+    {t:'계주 선수로 나간다',fx:{rel:4,mind:3,hp:-2},res:'바통을 놓칠 뻔했지만 끝까지 뛰었다. 반 친구들이 이름을 불러 주었다.'},
+    {t:'응원 구호와 반 티셔츠 디자인을 맡는다',fx:{rel:3,act:3},run(){rec('자율·자치활동','체육대회 학급 응원 기획');},res:'우리 반 응원 소리가 운동장에서 제일 컸다.'},
+    {t:'스탠드에서 단어장을 본다',fx:{sn:2,rel:-3},res:'단어는 외웠다. 그런데 함성이 터질 때마다 자꾸 고개가 들렸다.'}]}];
+  case '1-3':return[{title:'수행평가가 한꺼번에 네 개다',text:'이번 주에만 발표, 보고서, 실험, 서평이 겹쳤다.',opts:[
+    {t:'네 개 모두 공들여 준비한다',fx:{ns:3,act:4,hp:-5,mind:-3},res:'결과물은 만족스럽다. 금요일에는 눈 밑이 까맸다.'},
+    {t:'관심 있는 과목 하나를 깊이 있게 하고 나머지는 기본에 충실한다',fx:{ns:2,act:3,car:2,mind:-1},run(){rec('교과 탐구','수행평가 보고서에서 관심 주제 심화 탐구');},res:'보고서 끝에 선생님이 적어 주셨다. "더 알아보고 싶은 점이 잘 드러난다."'},
+    {t:'조별 과제의 조장을 맡아 역할을 나눈다',fx:{act:3,rel:3,mind:-3},res:'의견이 갈릴 때마다 진땀이 났다. 발표는 무사히 끝났다.'}]}];
+  case '1-4':return[{title:'첫 방학의 중심을 어디에 둘까?',text:'방학식 날, 담임 선생님이 말했다. "계획 하나만 정해서 끝까지 해 봐."',opts:[
+    {t:'1학기에 약했던 과목을 처음부터 다시 본다',fx:{ns:5,sn:3,mind:-3},res:'모르고 넘어갔던 단원이 생각보다 많았다. 하나씩 메웠다.'},
+    {t:'지역 진로체험센터의 직업 체험 프로그램에 신청한다',fx:{car:6,act:2},run(){S.int[g]+=1;rec('진로활동','여름방학 직업 체험 프로그램 참여');},res:'일하는 사람을 가까이서 본 건 처음이다. 궁금한 것이 더 늘었다.'},
+    {t:'읽고 싶던 책을 쌓아 두고 읽는다',fx:{mind:5,sn:2,car:2},run(){S.cnt.read=(S.cnt.read||0)+3;},res:'세 권을 읽었다. 한 권은 밑줄을 그어 가며 두 번 읽었다.'}]}];
+  case '1-5':return[{title:'2학년 선택과목을 무엇으로 채울까?',text:'과목 안내 책자를 받았다. 고교학점제에서는 2학년부터 시간표를 내가 만든다. 여기서 고른 과목은 2학년 성적표에 나온다.',
+    opts:fieldOpts(k=>({t:F[k].n+' 중심 · 「'+F[k].y2[0]+'」「'+F[k].y2[1]+'」',tag:k===top?'내 관심 1순위':'',run(){S.elect[2]=k;S.int[k]+=2;const m=k===top;
+      return{fx:m?{car:4}:{car:1},res:'「'+F[k].y2[0]+'」와 「'+F[k].y2[1]+'」를 신청했다. '+(m?'관심 분야와 이어지는 과목이라 수업이 기다려진다.':'지금까지의 활동과는 다른 분야다. 새로운 가능성을 열어 두었다.')};}}))
+    .concat([{t:'친한 친구가 고른 과목을 그대로 따라 신청한다',run(){const o=FKEYS.filter(k=>k!==top),k=o[Math.floor(Math.random()*o.length)];S.elect[2]=k;S.flags.followed=1;
+      return{fx:{rel:2,car:-2},res:'친구를 따라 「'+F[k].y2[0]+'」와 「'+F[k].y2[1]+'」를 신청했다. 같은 교실이라 든든하다. 수업이 나와 맞을지는 아직 모른다.'};}}])}];
+  case '1-6':return[{title:'축제 기간을 어떻게 보낼까?',text:'강당에 무대가 서고 교실마다 부스가 들어선다.',opts:[
+    {t:'동아리 부스 운영을 맡는다',fx:{act:5,rel:2,hp:-3},run(){rec('동아리활동',F[S.club].club+' 축제 부스 기획·운영');},res:'준비한 체험 활동에 줄이 길게 섰다. 다리는 아팠지만 뿌듯했다.'},
+    {t:'무대 공연에 나간다',fx:{rel:4,mind:4,act:2},res:'조명이 켜지자 머리가 하얘졌다. 박수 소리를 듣고 나서야 숨을 쉬었다.'},
+    {t:'잠깐 구경하고 자습실로 간다',fx:{ns:3,rel:-2},res:'자습실은 조용했다. 멀리서 노랫소리가 들렸다.'}]}];
+  case '1-7':return[{title:'어느 분야에 마음이 가니?',text:'진로 선생님이 묻는다. "1년 지내 보니 어때? 지금 정한다고 끝까지 가야 하는 건 아니야."',
+    opts:fieldOpts(k=>({t:F[k].n,tag:k===top?'활동 기록 1순위':'',fx:{car:5},run(){S.goal=k;S.int[k]+=1;},res:'「'+F[k].n+'」 분야를 중심으로 2학년을 준비하기로 했다.'}))
+    .concat([{t:'아직 모르겠어요. 더 알아볼게요',fx:{car:2,mind:3},res:'"모르는 게 당연해. 2학년 1학기에 세 가지만 직접 해 보자." 선생님과 탐색 계획을 세웠다.'}])}];
+  case '2-0':return[{title:'학급 임원 선거가 열린다',text:'칠판에 후보 등록 안내가 붙었다.',opts:[
+    {t:'학급 회장 선거에 나간다',run(){if(S.stats.rel>=55){rec('자율·자치활동','2학년 학급 회장');return{fx:{act:6,rel:3,mind:-2},res:'당선됐다. 첫 학급 회의에서 목소리가 조금 떨렸다.'};}
+      return{fx:{rel:2,act:1,mind:-1},res:'몇 표 차이로 떨어졌다. 그래도 연설을 끝까지 해냈고, 내 이름을 아는 친구가 늘었다.'};}},
+    {t:'학생회 부서에 지원한다',fx:{act:4,rel:2,hp:-2},run(){rec('자율·자치활동','학생회 부원 활동');},res:'행사 준비로 방과 후가 바빠졌다. 다른 반, 다른 학년 사람들을 알게 됐다.'},
+    {t:'맡지 않고 수업과 동아리에 집중한다',fx:{ns:2,mind:2},res:'내 시간표를 지키는 데 힘을 쓰기로 했다.'}]}];
+  case '2-1':return[{title:'선택과목이 생각보다 어렵다',text:'「'+schoolSubs()[3]+'」 수업 진도가 빠르다. 필기를 따라가기 벅차다.',opts:[
+    {t:'점심시간에 선생님께 질문하러 간다',fx:{ns:4,rel:1},res:'교무실 문을 두드리는 게 제일 어려웠다. 설명을 듣고 나니 막힌 곳이 풀렸다.'},
+    {t:'같은 과목을 듣는 친구와 서로 문제를 내 준다',fx:{ns:3,rel:3},res:'친구가 낸 문제에서 내가 놓친 개념을 찾았다.'},
+    {t:'문제집을 한 권 더 사서 혼자 푼다',fx:{ns:3,sn:2,hp:-3},res:'밤늦게까지 풀었다. 양으로 밀어붙이니 익숙해지긴 했다.'}]}];
+  case '2-2':return[{title:'탐구 주제를 무엇으로 정할까?',text:'주제 탐구 주간 계획서를 내야 한다.',opts:[
+    {t:'관심 분야에서 궁금했던 질문을 잡는다 · '+F[g].topic,tag:'관심 분야',fx:{act:6,car:4,hp:-3},run(){S.flags.topic=1;S.int[g]+=2;rec('교과 탐구','주제 탐구: '+F[g].topic);},res:'자료를 모으고 직접 조사했다. 발표 뒤에 질문이 여럿 나왔다. 대답하면서 더 알고 싶어졌다.'},
+    {t:'자료가 많아 쓰기 쉬운 주제를 고른다',fx:{act:3,ns:1},res:'보고서는 금방 완성했다. 발표가 끝나고 기억에 남는 건 많지 않았다.'},
+    {t:'분량만 채워 내고 모의고사 공부를 한다',fx:{sn:4,car:-1},res:'문제집은 한 단원 더 나갔다. 탐구 보고서는 한 쪽으로 끝냈다.'}]}];
+  case '2-3':return[{title:'3학년 과목은 어떤 기준으로 고를까?',text:'3학년 과목은 대학에서도 눈여겨본다고 한다. 수강생이 적은 과목은 등급 받기가 어렵다는 말도 돈다.',opts:[
+    {t:'희망 분야와 이어지는 심화 과목 · 「'+F[g].y3[0]+'」「'+F[g].y3[1]+'」',tag:'진로 연계',fx:{car:4},run(){S.el3='fit';S.elect[3]=g;S.y3subs=F[g].y3;S.int[g]+=2;},res:'어렵다는 소문이 있다. 그래도 배우고 싶던 내용이다.'},
+    {t:'수강생이 많아 등급 받기 유리하다는 과목',fx:{car:-2,mind:1},run(){S.el3='easy';S.y3subs=['화법과 언어','지구과학'];},res:'많은 친구가 고른 과목으로 신청했다. 성적 부담은 덜었다. 내 진로와 이어지는지는 잘 모르겠다.'},
+    {t:'수능 공부에 도움이 되는 과목',fx:{sn:3},run(){S.el3='csat';S.y3subs=['주제 탐구 독서','영어 독해와 작문'];},res:'읽기와 영어 중심으로 시간표를 짰다. 수능 준비와 수업을 겹치게 만들었다.'}]}];
+  case '2-4':return[{title:'교실 밖에서 진로를 확인해 볼까?',text:'방학 프로그램 안내문이 두 장 왔다. 독서실 등록 기간이기도 하다.',opts:[
+    {t:'대학 전공 체험 캠프에 간다',fx:{car:5,act:3},run(){S.flags.sawCollege=1;S.int[g]+=1;rec('진로활동','대학 전공 체험 캠프 참여('+F[g].n+')');},res:'강의실에 앉아 보니 이걸 4년 동안 배운다는 게 실감 났다.'},
+    {t:'관심 직업의 현장을 찾아가 일하는 사람을 인터뷰한다',fx:{car:7,act:2},run(){S.flags.sawJob=1;S.int[g]+=1;rec('진로활동','직업인 인터뷰 보고서 작성');},res:'책에서 본 것과 달랐다. 힘든 점도 보람도 직접 들었다.'},
+    {t:'독서실에서 부족한 과목을 메운다',fx:{ns:4,sn:5,mind:-5,hp:-3},res:'하루 열 시간씩 앉아 있었다. 개학 날 거울 속 얼굴이 조금 지쳐 보였다.'}]}];
+  case '2-5':return[
+    {title:'어느 분야로 갈까?',text:'상담실. 진로 선생님과 2년 동안의 활동 기록을 펼쳐 놓았다.',
+      opts:fieldOpts(k=>({t:F[k].n,tag:k===S.goal?'지금까지의 목표':(k===top?'활동 기록 1순위':''),run(){const same=!S.goal||S.goal===k;S.goal=k;if(!same)S.flags.changed=1;
+        return same?{fx:{car:3},res:'「'+F[k].n+'」 분야로 방향이 더 또렷해졌다.'}:{fx:{car:1,mind:2},res:'「'+F[k].n+'」 분야로 방향을 바꿨다. 늦은 것이 아니라 해 보고 알게 된 것이다.'};}}))},
+    {title:'졸업하면 바로 무엇을 할까?',text:'"대학에 가는 길도 있고, 기술을 배워 먼저 일하는 길도 있어. 어느 쪽이든 나중에 바꿀 수 있어."',opts:[
+      {t:'대학에 진학해 더 배운다',fx:{car:2},run(){S.path='college';},res:'진학으로 정했다.'},
+      {t:'기술을 배워 먼저 취업한다 (3학년 직업교육 위탁과정 신청)',fx:{car:3},run(){S.path='job';rec('진로활동','3학년 직업교육 위탁과정 신청');},res:'취업으로 정했다. 3학년 1년 동안 위탁 교육기관에서 직업 교육을 받는다.'},
+      {t:'아직 정하지 못했다. 진학을 준비하면서 더 알아본다',fx:{mind:1},run(){S.path='college';S.flags.undecided=1;},res:'일단 진학을 준비하면서 길을 열어 두기로 했다.'}]},
+    job?{title:'어떤 일을 배울까?',text:F[S.goal].n+' 분야의 위탁과정 목록이다. 과정마다 준비하는 자격증이 다르다.',
+      opts:F[S.goal].jobs.map(j=>({t:j.n+' · 준비 자격증: '+j.c,fx:{car:3},run(){S.job=j;S.major=null;},res:'「'+j.n+'」 과정에 지원서를 냈다.'}))}
+    :{title:'어느 학과를 목표로 할까?',text:F[S.goal||g].n+' 분야의 학과 목록이다. 지금 고른 학과는 3학년 때 지원 목표가 된다.',
+      opts:F[S.goal||g].majors.map(m=>({t:m,fx:{car:3},run(){S.major=m;S.job=null;},res:'목표를 「'+m+'」로 적었다.'}))}];
+  case '2-6':return[{title:'손이 움직이지 않는다',text:'성적은 제자리인데 해야 할 일은 늘어난다. 책상에 앉아도 집중이 되지 않는다.',opts:[
+    {t:'담임 선생님께 솔직하게 이야기한다',fx:{mind:6,car:2},res:'"다들 이맘때 그래." 그 한마디에 어깨가 조금 내려갔다.'},
+    {t:'공부 시간을 기록해 보고 방법을 바꾼다',fx:{ns:3,sn:3,mind:1},res:'앉아 있던 시간과 실제로 공부한 시간이 달랐다. 과목 순서를 바꿨다.'},
+    {t:'주말 이틀은 아무것도 하지 않고 쉰다',fx:{mind:7,hp:4,ns:-1},res:'늦잠을 자고 산책을 했다. 월요일 아침이 조금 가벼웠다.'}]}];
+  case '2-7':return[job?{title:'위탁과정 시작 전에 무엇을 해 둘까?',text:'3월까지 두 달이 남았다.',opts:[
+    {t:'기초 자격증을 먼저 준비한다',fx:{skill:6,mind:-2},res:'문서 작성과 표 계산부터 익혔다. 어떤 일을 하든 쓰는 기술이다.'},
+    {t:'배울 직무의 현장을 미리 찾아가 본다',fx:{car:4,skill:3},res:'일하는 순서와 도구를 눈으로 익혔다. 3월이 덜 막막해졌다.'},
+    {t:'아침 운동과 규칙적인 생활로 체력을 만든다',fx:{hp:7,mind:4},res:'실습은 하루 종일 서서 한다고 들었다. 몸부터 준비했다.'}]}
+  :{title:'예비 고3의 겨울을 어떻게 쓸까?',text:'선배가 말했다. "겨울방학에 만든 습관이 1년을 간다."',opts:[
+    {t:'국어, 수학, 영어 개념을 처음부터 다시 정리한다',fx:{sn:7,hp:-3,mind:-3},res:'안다고 생각했던 개념에 빈틈이 많았다. 노트 세 권을 채웠다.'},
+    {t:'학생부를 읽어 보고 빈 곳을 채울 계획을 세운다',fx:{act:3,car:4},res:'내 기록을 처음부터 끝까지 읽은 건 처음이다. 3학년 1학기에 할 일이 보였다.'},
+    {t:'아침 운동과 정해진 공부 시간으로 생활 리듬을 만든다',fx:{hp:6,mind:4,ns:2,sn:2},res:'같은 시간에 일어나고 같은 시간에 잤다. 몸이 먼저 적응했다.'}]}];
+  case '3-0':{const sc=trackScores(),best=['jonghap','gyogwa','jeongsi'].sort((a,b)=>sc[b]-sc[a])[0];
+    return[{title:'어느 전형에 무게를 둘까?',text:'담임 선생님이 성적표와 학생부를 함께 본다. 내신 평균 '+g1(nsAvg())+'등급, 최근 모의고사 평균 '+g1(sc.mk)+'등급, 활동 '+S.stats.act+', 진로 '+S.stats.car+'. "목표는 「'+S.major+'」. 어디에 힘을 실을지 정하자."',opts:[
+      {t:'학생부종합전형 · 내신과 함께 활동, 진로 이야기를 본다',tag:best==='jonghap'?'선생님 추천':'',fx:{car:2},run(){S.track='jonghap';},res:'학생부종합전형을 중심에 두기로 했다. 남은 한 학기의 수업과 활동이 모두 기록이 된다.'},
+      {t:'학생부교과전형 · 내신 등급이 가장 중요하다',tag:best==='gyogwa'?'선생님 추천':'',fx:{car:2},run(){S.track='gyogwa';},res:'학생부교과전형을 중심에 두기로 했다. 수능 최저학력기준이 있는 곳이 많아 수능 공부도 놓을 수 없다.'},
+      {t:'수능 위주 전형(정시) · 수능 점수로 지원한다',tag:best==='jeongsi'?'선생님 추천':'',fx:{car:2},run(){S.track='jeongsi';},res:'정시를 중심에 두기로 했다. 11월 하루의 시험을 위해 1년을 쓴다.'}]}];}
+  case '3-1':return[{title:'친구와 서먹해졌다',text:'예민해진 교실에서 사소한 말 한마디로 친한 친구와 다퉜다.',opts:[
+    {t:'쉬는 시간에 먼저 말을 건다',fx:{rel:5,mind:3},res:'"미안, 나도 예민했어." 둘 다 같은 말을 했다.'},
+    {t:'당분간 거리를 두고 공부에 집중한다',fx:{ns:2,rel:-3,mind:-1},res:'문제집은 넘어가는데 옆자리가 자꾸 신경 쓰였다.'},
+    {t:'다른 친구에게 사이에서 이야기를 전해 달라고 한다',fx:{rel:2,mind:1},res:'어색하긴 해도 다시 인사는 하게 됐다.'}]}];
+  case '3-2':return[{title:'모의평가 전 일주일',text:'이 시험 결과를 보고 수시 지원 범위를 정한다.',opts:[
+    {t:'실제 시간표대로 시간을 재고 푼다',fx:{sn:4,hp:-1},res:'국어 시간이 5분 모자랐다. 무엇부터 풀지 순서를 정했다.'},
+    {t:'자주 틀리는 단원만 골라 다시 본다',fx:{sn:3,ns:1},res:'틀리는 문제는 늘 같은 유형이었다. 오답 노트에 표시를 했다.'},
+    {t:'잠과 식사 시간을 시험 시간표에 맞춘다',fx:{hp:4,mind:3,sn:1},res:'아침 8시 40분에 머리가 깨어 있도록 일주일을 맞췄다.'}]}];
+  case '3-3':return[{title:'마지막 내신, 어디에 힘을 쓸까?',text:'이번 학기까지의 기록이 수시에 들어간다.',opts:[
+    {t:'기말고사에 온 힘을 쏟는다',fx:{ns:5,hp:-4,mind:-2},res:'마지막 시험지를 내고 나오는데 다리에 힘이 풀렸다.'},
+    {t:'수업 발표와 탐구 보고서를 마무리해 학생부를 채운다',fx:{act:5,ns:1,mind:-2},run(){rec('교과 탐구','3학년 1학기 '+schoolSubs()[3]+' 심화 발표');},res:'3년 동안 이어 온 관심을 마지막 발표에 담았다.'},
+    {t:'수능 공부 흐름을 끊지 않는다',fx:{sn:4,ns:-1},res:'내신 시험 기간에도 수능 문제집을 놓지 않았다.'}]}];
+  case '3-4':return[{title:'수시 여섯 장을 어떻게 쓸까?',text:'상향은 합격 가능성이 낮지만 가고 싶은 곳, 적정은 내 성적에 맞는 곳, 안정은 합격 가능성이 높은 곳이다. 수시에 합격하면 정시에는 지원할 수 없다.',opts:[
+    {t:'도전형 · 상향 3, 적정 2, 안정 1',run(){S.strat='high';},fx:{mind:-1},res:'가고 싶은 곳을 많이 넣었다. 떨리지만 후회는 없다.'},
+    {t:'균형형 · 상향 2, 적정 2, 안정 2',run(){S.strat='mid';},fx:{mind:1},res:'골고루 나눠 넣었다. 담임 선생님이 고개를 끄덕였다.'},
+    {t:'안정형 · 상향 1, 적정 2, 안정 3',run(){S.strat='safe';},fx:{mind:2},res:'합격 가능성이 높은 곳을 많이 넣었다. 마음이 조금 놓였다.'},
+    {t:'수시는 쓰지 않고 정시에 집중한다',tag:S.track==='jeongsi'?'정시 중심':'',run(){S.strat='none';},fx:{sn:2},res:'원서접수 기간에도 문제집을 폈다. 수능 하루에 모든 것을 건다.'}]}];
+  case '3-5':return[{title:'수능까지 두 달, 무엇을 챙길까?',text:S.strat==='none'?'친구들이 면접 준비를 하는 동안에도 자리를 지킨다.':'면접이 있는 전형도 있고, 수능 최저학력기준을 맞춰야 하는 전형도 있다.',opts:[
+    {t:'선생님, 친구들과 모의 면접을 연습한다',fx:{car:2,mind:1},run(){S.flags.iv=1;},res:'"왜 이 학과인가요?" 첫 질문에서 막혔다. 세 번째 연습에서는 내 말로 대답했다.'},
+    {t:'수능 공부에 집중한다',fx:{sn:5,hp:-2},res:'매일 같은 시간에 같은 순서로 문제를 풀었다.'},
+    {t:'하루 일과표를 고정하고 수면 시간을 지킨다',fx:{hp:4,mind:4,sn:1},res:'밤 12시에는 불을 껐다. 불안한 날에도 지켰다.'}]}];
+  case '3-6':return[{title:'수능 전날 밤',text:'수험표와 신분증, 도시락을 챙겼다. 시계는 밤 10시를 가리킨다.',opts:[
+    {t:'평소 시간에 잠자리에 든다',fx:{mind:4,hp:3},res:'잠이 바로 오지는 않았다. 그래도 눈을 감고 누워 있었다.'},
+    {t:'불안해서 새벽까지 요약 노트를 본다',fx:{sn:1,hp:-8,mind:-3},res:'새벽 2시에 겨우 잠들었다. 아침에 머리가 무거웠다.'},
+    {t:'가볍게 걷고 좋아하는 음악을 듣는다',fx:{mind:6},res:'동네를 한 바퀴 돌았다. 3년 동안 다닌 길이 보였다.'}]}];
+  case '3-0j':return[{title:'교육기관 첫 실습 날',text:'여러 학교에서 온 학생들이 한 실습실에 모였다.',opts:[
+    {t:'실습 조에서 먼저 인사하고 역할을 맡는다',fx:{rel:4,skill:3},res:'조원 이름을 다 외웠다. 도구 정리 담당을 맡았다.'},
+    {t:'말수는 적어도 실습 과제를 끝까지 해낸다',fx:{skill:5},res:'가장 늦게 실습실을 나왔다. 강사님이 과제물을 한참 들여다봤다.'},
+    {t:'모르는 것은 그때그때 강사님께 묻는다',fx:{skill:4,car:2},res:'질문할 때마다 현장 이야기가 따라왔다.'}]}];
+  case '3-1j':return[{title:'필기시험을 어떻게 준비할까?',text:'시험까지 3주. 이론 과목은 처음 보는 용어가 많다.',opts:[
+    {t:'기출문제를 세 번 반복해서 푼다',fx:{skill:5,mind:-2},res:'세 번째에는 문제를 읽기 전에 답이 떠올랐다.'},
+    {t:'같은 과정 친구들과 모르는 문제를 나눠 설명한다',fx:{skill:3,rel:3},res:'서로 맡은 단원을 설명했다. 쉬는 시간이 스터디가 됐다.'},
+    {t:'이론은 최소한만 보고 실습 연습을 더 한다',fx:{skill:2,hp:-1},res:'손은 익숙해졌다. 이론 문제는 여전히 낯설다.'}]}];
+  case '3-2j':return[{title:'실습 프로젝트를 어떻게 남길까?',text:'처음부터 끝까지 혼자 완성하는 과제다.',opts:[
+    {t:'과정을 사진과 글로 기록해 포트폴리오로 만든다',fx:{skill:3,act:5},run(){rec('진로활동','실습 프로젝트 포트폴리오 제작');},res:'완성품보다 과정 기록이 더 두꺼워졌다. 면접 때 보여 줄 자료가 생겼다.'},
+    {t:'실수한 부분을 처음부터 다시 만든다',fx:{skill:5,mind:1,hp:-2},res:'두 번째 결과물은 처음 것과 달랐다. 어디서 틀렸는지 손이 기억한다.'},
+    {t:'제출 기한에 맞춰 기본만 완성한다',fx:{skill:2,mind:2},res:'기한 안에 냈다. 아쉬운 부분은 그대로 남았다.'}]}];
+  case '3-3j':return[{title:'실기시험 전 마지막 연습',text:'시험장에서는 정해진 시간 안에 과제를 끝내야 한다.',opts:[
+    {t:'시간을 재며 과제를 처음부터 끝까지 반복한다',fx:{skill:5,hp:-3},res:'처음에는 10분이 모자랐다. 다섯 번째에는 3분이 남았다.'},
+    {t:'자주 감점되는 부분만 골라 다듬는다',fx:{skill:4},res:'강사님이 짚어 준 세 군데를 집중해서 고쳤다.'},
+    {t:'전날은 연습을 줄이고 컨디션을 맞춘다',fx:{hp:4,mind:4,skill:1},res:'도구를 닦아 가방에 넣고 일찍 잤다.'}]}];
+  case '3-4j':return[{title:'취업 준비를 무엇부터 할까?',text:'채용은 가을에 몰린다. 방학이 준비할 수 있는 마지막 시간이다.',opts:[
+    {t:'이력서와 자기소개서를 써서 선생님께 첨삭을 받는다',fx:{car:4},run(){S.flags.resume=1;},res:'빨간 펜 자국이 가득한 종이를 돌려받았다. 세 번 고쳐 썼다.'},
+    {t:'자격증을 하나 더 준비한다',fx:{skill:5,hp:-3},res:'방학 내내 교육기관 자습실에 나갔다.'},
+    {t:'관련 분야에서 단기 일 경험을 해 본다',fx:{skill:3,rel:2,car:3},res:'보호자 동의서를 내고 근로계약서를 쓴 뒤 일을 시작했다. 배운 것과 현장은 조금 달랐다.'}]}];
+  case '3-5j':return[{title:'어떤 기준으로 지원할까?',text:'취업 담당 선생님이 공고 목록을 보여 준다.',opts:[
+    {t:'하고 싶은 직무와 배울 수 있는 환경을 먼저 본다',fx:{car:3},run(){S.jstrat='fit';},res:'직무 내용과 선배 직원 이야기를 꼼꼼히 읽고 두 곳에 지원했다.'},
+    {t:'규모가 크고 조건이 좋은 곳에 도전한다',fx:{mind:-1},run(){S.jstrat='high';},res:'경쟁률이 높은 곳에 지원서를 냈다. 2지망도 함께 적었다.'},
+    {t:'합격 가능성이 높고 집에서 가까운 곳을 고른다',fx:{mind:2},run(){S.jstrat='safe';},res:'통근 시간이 짧은 곳으로 지원했다.'}]}];
+  case '3-6j':return[{title:'면접을 어떻게 준비할까?',text:'면접은 일주일 뒤다.',opts:[
+    {t:'취업 담당 선생님과 모의 면접을 세 번 한다',fx:{mind:2},run(){S.flags.iv=1;},res:'첫 번째는 목소리가 작았다. 세 번째에는 눈을 보고 대답했다.'},
+    {t:'회사와 직무를 조사해 질문 목록을 만든다',fx:{car:3},run(){S.flags.research=1;},res:'회사가 하는 일을 한 장으로 정리했다. 묻고 싶은 것도 두 가지 적었다.'},
+    {t:'자격증과 포트폴리오를 믿고 평소대로 간다',fx:{mind:1},res:'준비한 서류를 다시 확인하고 일찍 잤다.'}]}];
+  }
+  return[{title:'이번 달',text:'',opts:[{t:'평소처럼 보낸다',fx:{},res:'한 달이 지나갔다.'}]}];
+}
+function choose(i){
+  const steps=evSteps(),st=steps[S.step],o=st.opts[i];if(!o)return;
+  let fx=o.fx||{},res=o.res||'';
+  if(o.run){const r=o.run();if(r){if(r.fx)fx=r.fx;if(r.res)res=r.res;}}
+  S.log.push({q:st.title,a:o.t,res,fx:apply(fx)});
+  if(S.step<steps.length-1)S.step++;else finishEvent();
+}
+function finishEvent(){
+  const c=cal(),R={exams:[]};
+  [c.ex,c.ex2].forEach(x=>{if(x){const e=runExam(x);if(e)R.exams.push(e);}});
+  S.res=R;S.phase='result';checkBurn();
+}
+function next(){
+  if(slot()===7&&year()<3){S.phase='yearend';return;}
+  S.t++;startTurn();
+}
+function nextYear(){S.t++;S.stY=Object.assign({},S.stats);startTurn();}
+
+/* ---------- 졸업 ---------- */
+const LV=['상향','적정','안정'],THR={상향:76,적정:60,안정:44};
+function tryApp(score,lv,key,csat){
+  if(key==='gyogwa'){const lim={상향:4.0,적정:5.0}[lv];if(lim&&csat>lim)return{lv,pass:false,why:'수능 최저학력기준을 맞추지 못했다'};}
+  return{lv,pass:Math.random()<1/(1+Math.exp(-(score-THR[lv])/5))};
+}
+const bestLv=a=>{for(const l of LV)if(a.some(x=>x.pass&&x.lv===l))return l;return null;};
+function runFinal(){
+  S.phase='final';S.fp=0;
+  if(S.path==='job'){
+    const s=S.stats,f=S.flags;
+    const sc=0.5*s.skill+(S.cert===2?15:S.cert===1?6:0)+0.1*s.rel+0.15*s.car+(f.resume?5:0)+(f.iv?5:0)+(f.research?4:0)+Math.min(6,(S.cnt.jobprep||0)*2)+0.05*s.mind+rnd(-5,5);
+    const T={high:[78,60],fit:[68,54],safe:[999,46]}[S.jstrat||'fit'];
+    const lv=sc>=T[0]?'top':sc>=T[1]?'ok':'none';
+    S.fin={kind:'job',lv,pages:lv==='none'?['jobres','fallback','grad']:['jobres','contract','grad'],fb:null};
+    return;
+  }
+  const sc=trackScores(),cs=S.csat?S.csat.avg:9;
+  let key=S.track||'jonghap';if(key==='jeongsi')key=sc.jonghap>=sc.gyogwa?'jonghap':'gyogwa';
+  let susi=[],sb=null,jeongsi=[],jb=null;const pages=[];
+  if(S.strat&&S.strat!=='none'){
+    const mix={high:['상향','상향','상향','적정','적정','안정'],mid:['상향','상향','적정','적정','안정','안정'],safe:['상향','적정','적정','안정','안정','안정']}[S.strat];
+    susi=mix.map(lv=>tryApp(sc[key],lv,key,cs));sb=bestLv(susi);pages.push('susi');
+  }
+  if(!sb){jeongsi=LV.map(lv=>tryApp(sc.jeongsi,lv,'jeongsi',cs));jb=bestLv(jeongsi);pages.push('jeongsi');}
+  if(!sb&&!jb)pages.push('fallback');
+  pages.push('grad');
+  S.fin={kind:'college',key,susi,sb,jeongsi,jb,pages,fb:null};
+}
+function outcome(){
+  const f=S.fin;
+  if(f.kind==='college'){
+    if(f.sb)return{h:S.major+' 진학',s:TRACKN[f.key]+', '+f.sb+' 지원 합격'};
+    if(f.jb)return{h:S.major+' 진학',s:TRACKN.jeongsi+', '+f.jb+' 지원 합격'};
+    return[{h:'한 번 더 도전',s:'1년 더 준비해 '+S.major+'에 다시 지원하기로 했다'},
+      {h:'전문대학 '+F[aim()].n+' 계열 진학',s:'추가모집으로 합격했다'},
+      {h:'직업 훈련과 취업 준비',s:'일을 먼저 시작하고 진학은 나중에 다시 생각하기로 했다'}][f.fb||0];
+  }
+  if(f.lv==='top')return{h:S.job.n+' 분야 취업',s:S.jstrat==='high'?'도전한 기업에 최종 합격':'희망 직무와 맞는 일터에 최종 합격'};
+  if(f.lv==='ok')return{h:S.job.n+' 분야 취업',s:S.jstrat==='high'?'2지망 기업에 최종 합격':S.jstrat==='safe'?'집에서 가까운 일터에 최종 합격':'최종 합격'};
+  return[{h:'졸업 후 구직 계속',s:'취업 지원 프로그램에 참여하며 일자리를 찾는다'},
+    {h:'전문대학 진학',s:S.job.n+' 기술을 더 배우기로 했다'},
+    {h:'자격증 보완 후 재지원',s:'내년 상반기 채용에 다시 지원한다'}][f.fb||0];
+}
+function pickType(){
+  const s=S.stats,sc={};
+  sc.explorer=(s.act+s.car)/2-6+fitScore()*0.12;
+  sc.scholar=Math.max(s.ns,S.path==='job'?0:s.sn)+6;
+  sc.people=s.rel+6;
+  sc.care=(s.hp+s.mind)/2+2-S.burns*10;
+  const mn=Math.min(s.ns,s.act,s.car,s.rel,s.hp,s.mind);sc.balance=mn>=45?mn+32:0;
+  if(S.exams.length>=4){const imp=S.exams[0].avg-S.exams[S.exams.length-1].avg;sc.late=imp>=1?66+imp*12:0;}
+  if(S.path==='job')sc.maker=s.skill+10;
+  let b='explorer';for(const k in sc)if(sc[k]>sc[b])b=k;
+  return sc[b]<55?'seeker':b;
+}
+function summaryText(){
+  const o=outcome(),t=TYPES[pickType()],s=S.stats,g=aim();
+  const keys=hudKeys();
+  const L=['[ASGS 고교 3년 결과]','이름: '+S.name+' ('+CHARS[S.ch].label+' 캐릭터)','졸업 후의 길: '+o.h+' ('+o.s+')','3년의 모습: '+t.n,
+    '최종 능력치: '+keys.map(k=>STN[k]+' '+s[k]).join(', '),
+    '내신 평균: '+(nsAvg()?g1(nsAvg())+'등급':'-')+' / 모의고사 평균: '+(mkAvg()?g1(mkAvg())+'등급':'-')+(S.csat?' / 수능 평균: '+g1(S.csat.avg)+'등급':''),
+    '희망 분야: '+F[g].n+(S.major?' ('+S.major+')':S.job?' ('+S.job.n+')':''),
+    '선택과목: 2학년 '+F[S.elect[2]||g].y2.join(', ')+' / 3학년 '+(S.y3subs||F[g].y3).join(', '),
+    '학생부 기록: '+S.recs.length+'건, 독서 '+(S.cnt.read||0)+'권, 봉사 '+((S.cnt.vol||0)*4)+'시간'];
+  return L.join('\n');
+}
+
+/* ---------- 저장 ---------- */
+function save(){try{if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
+function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return null;const o=JSON.parse(r);return o&&o.v===1&&o.stats?o:null;}catch(e){return null;}}
+function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
+
+/* ---------- 화면 ---------- */
+function avatar(c,sz){
+  const hairBack=c==='f'?'<path d="M16 30c0-12 7-19 16-19s16 7 16 19v11c0 3-2 5-5 5H21c-3 0-5-2-5-5z" fill="#3A2A22"/>':'';
+  const hair=c==='f'?'<path d="M18.5 28c1-10 6-15.5 13.5-15.5S44.500 18 45.500 28c-5.500 0-10.500-2.500-13.500-6.500C29 25.500 24 28 18.500 28z" fill="#3A2A22"/>'
+    :'<path d="M18.5 27c0-10 6-16.500 13.500-16.500S45.500 17 45.500 27c-3.500-1-6.500-3-8.500-6-4.500 4-10.500 6-18.500 6z" fill="#2A211D"/>';
+  return'<svg viewBox="0 0 64 64" width="'+sz+'" height="'+sz+'" aria-hidden="true"><defs><clipPath id="avc"><circle cx="32" cy="32" r="32"/></clipPath></defs><g clip-path="url(#avc)">'
+    +'<rect width="64" height="64" fill="var(--av-bg)"/>'+hairBack
+    +'<path d="M9 66c0-14 10-21 23-21s23 7 23 21z" fill="var(--av-uni)"/><rect x="28" y="38" width="8" height="9" fill="#EBC3A3"/>'
+    +'<path d="M25 44.500l7 8 7-8z" fill="#fff"/><path d="M32 51l-2.500 7h5z" fill="#C93A20"/>'
+    +'<circle cx="32" cy="28" r="13" fill="#F3CFB2"/>'+hair
+    +'<circle cx="27" cy="30.500" r="1.600" fill="#2A211D"/><circle cx="37" cy="30.500" r="1.600" fill="#2A211D"/>'
+    +'<path d="M28.500 35.500q3.500 2.600 7 0" fill="none" stroke="#2A211D" stroke-width="1.500" stroke-linecap="round"/></g></svg>';
+}
+function chips(fx){
+  const ks=Object.keys(fx||{}).filter(k=>fx[k]);if(!ks.length)return'';
+  return'<span class="dl">'+ks.map(k=>'<i class="d '+(fx[k]>0?'up':'dn')+'">'+STN[k]+' '+(fx[k]>0?'+':'−')+Math.abs(fx[k])+'</i>').join('')+'</span>';
+}
+function fxText(fx){
+  return Object.keys(fx).map(k=>{const v=fx[k];return'<i class="'+(v>0?'up':'dn')+'">'+STN[k]+(v>0?(v>=6?'▲▲':'▲'):(v<=-4?'▼▼':'▼'))+'</i>';}).join('');
+}
+function hudKeys(){return['ns',S.path==='job'?'skill':'sn','act','car','rel','hp','mind'];}
+function shd(title,left){return'<div class="shd"><span class="shd-m">'+(left||(year()+'학년 '+cal().m))+'</span><h2>'+title+'</h2></div>';}
+
+function vTitle(){
+  const sv=loadSave();let rs='';
+  if(sv&&sv.phase!=='ending'){const y=Math.floor(sv.t/8)+1;rs='<button class="btn ghost" data-a="resume">이어서 하기 ('+esc(sv.name)+', '+y+'학년)</button>';}
+  return'<main class="wrap"><section class="bb"><p class="bb-date">3월 2일 월요일 · 주번: 나</p>'
+    +'<h1 class="bb-title"><span>ASGS</span> 고교 3년</h1>'
+    +'<p class="bb-sub">입학식부터 졸업식까지.<br>시험, 모의고사, 동아리, 진로 결정을 내가 고른다.</p>'
+    +'<div class="bb-btns"><button class="btn chalk" data-a="tochar">입학하기</button>'+rs+'</div></section>'
+    +'<section class="sheet"><h2 class="h3">게임 방법</h2><ol class="how">'
+    +'<li><span><b>한 달 계획</b> 활동 카드 3장을 골라 시간을 쓴다. 공부만 하면 체력과 마음이 떨어진다.</span></li>'
+    +'<li><span><b>이달의 선택</b> 동아리, 과목 선택, 진로 상담처럼 그달에 생기는 일에 답을 고른다.</span></li>'
+    +'<li><span><b>결과 확인</b> 학교 시험은 5등급제, 모의고사는 9등급제로 성적표가 나온다.</span></li></ol>'
+    +'<p class="muted">3년을 24번의 달로 나누어 진행하고 20분쯤 걸린다. 정답은 없다. 졸업할 때 진학이나 취업 결과와 함께 어떤 3년이었는지 확인한다.</p></section></main>';
+}
+function vChar(){
+  const cards=['f','m'].map(k=>{const c=CHARS[k];return'<button class="charc'+(UI.sel===k?' on':'')+'" data-a="sel" data-v="'+k+'" data-k="ch-'+k+'" aria-pressed="'+(UI.sel===k)+'">'
+    +avatar(k,84)+'<span class="cl">'+c.label+'</span><span class="cn">'+c.name+'</span><span class="ct">'+c.line+'</span><span class="cd">'+c.desc+'</span></button>';}).join('');
+  return'<main class="wrap"><section class="sheet">'+shd('신입생 등록','ASGS 1학년')
+    +'<p class="lead">3년 동안 함께할 학생을 고른다. 두 사람 모두 아직 하고 싶은 일을 정하지 못했다.</p>'
+    +'<div class="chars">'+cards+'</div>'
+    +'<label class="field" for="nm">이름 (바꿔도 된다)<input id="nm" data-k="nm" type="text" maxlength="8" autocomplete="off" placeholder="'+CHARS[UI.sel].name+'" value="'+esc(UI.name)+'"></label>'
+    +'<button class="btn" data-a="start">이 학생으로 입학한다</button></section>'
+    +'<button class="textbtn" data-a="totitle">처음 화면으로</button></main>';
+}
+function vHud(){
+  const c=cal(),keys=hudKeys();let ticks='';
+  for(let i=0;i<24;i++)ticks+='<i class="'+(i<S.t?'pd':i===S.t?'cu':'')+(i&&i%8===0?' ys':'')+'"></i>';
+  const gs=keys.map((k,i)=>{const v=S.stats[k],low=(k==='hp'||k==='mind')&&v<30,chg=prev&&prev[k]!==undefined&&prev[k]!==v;
+    return'<div class="gg'+(i===2||i===5?' sep':'')+(low?' low':'')+(chg?' chg':'')+'"><span>'+STN[k]+'</span><b>'+v+'</b><i class="bar"><i style="width:'+v+'%"></i></i></div>';}).join('');
+  return'<header class="hud"><div class="hud-in"><div class="hud-top"><span class="hud-av">'+avatar(S.ch,38)+'</span>'
+    +'<div class="hud-id"><b>'+esc(S.name)+'</b><span>'+year()+'학년 '+c.m+' · '+c.n+'</span></div>'
+    +'<div class="hud-btn"><button data-a="modal" data-v="rec" data-k="m-rec">학생부</button><button data-a="modal" data-v="grade" data-k="m-grade">성적표</button></div></div>'
+    +'<div class="ticks" role="img" aria-label="전체 24개월 가운데 '+(S.t+1)+'번째 달">'+ticks+'</div>'
+    +'<div class="gauges">'+gs+'</div></div></header>';
+}
+function vPlan(){
+  const c=ctx(),list=ACTS.filter(a=>!a.when||a.when(c)),tired=S.stats.hp<30||S.stats.mind<30;
+  const slots=[0,1,2].map(i=>{const a=ACT[S.picks[i]];return'<span class="slot'+(a?' on':'')+'">'+(a?a.n:'비어 있음')+'</span>';}).join('');
+  const cards=list.map(a=>{const on=S.picks.includes(a.id),full=S.picks.length>=3&&!on;
+    const d=a.id==='club'?(S.club?F[S.club].club:''):a.d;
+    return'<button class="actc'+(on?' on':'')+'" data-a="pick" data-v="'+a.id+'" data-k="act-'+a.id+'" aria-pressed="'+on+'"'+(full?' disabled':'')+'>'
+      +'<span class="ic" aria-hidden="true">'+a.ic+'</span><span class="an">'+a.n+'</span><span class="ad">'+d+'</span><span class="af">'+fxText(a.fx)+'</span></button>';}).join('');
+  return'<section class="sheet">'+shd(cal().n)+'<p class="lead">'+intro()+'</p>'
+    +(S.hap?'<p class="note"><b>이달의 소식</b><span>'+S.hap.t+'</span>'+chips(S.hap.fx)+'</p>':'')
+    +(tired?'<p class="note warn">몸이나 마음이 많이 지쳤다. 이 상태에서는 공부와 활동의 효과가 줄어든다. 0이 되면 한 달을 통째로 쉬어야 한다.</p>':'')
+    +'<h3 class="q"><span class="qn">문제 1.</span>이번 달 시간을 어디에 쓸까? <em>3개 선택</em></h3>'
+    +'<div class="slots">'+slots+'</div><div class="acts">'+cards+'</div>'
+    +'<button class="btn" data-a="go" data-k="go"'+(S.picks.length<3?' disabled':'')+'>이 계획대로 보낸다</button></section>'
+    +'<button class="textbtn" data-a="totitle">처음 화면으로 (진행 상황은 저장된다)</button>';
+}
+function vBurn(){
+  return'<section class="sheet">'+shd(cal().n)+'<p class="stamp no">번아웃</p>'
+    +'<p class="lead">아침에 몸이 일어나지지 않는다. 책을 펴도 글자가 흩어진다. 보건 선생님은 지금 필요한 건 계획이 아니라 쉬는 것이라고 했다.</p>'
+    +'<p class="muted">이번 달은 계획을 세우지 않고 쉬어 간다. 체력과 마음이 회복되고, 그동안 성적은 조금 내려간다.</p>'
+    +'<button class="btn" data-a="burn" data-k="go">한 달 쉬어 간다</button></section>';
+}
+function vDone(){
+  if(!S.planFx)return'';
+  return'<div class="done"><span><b>이번 달 한 일</b> '+S.planNames.join(', ')+'</span>'+chips(S.planFx)
+    +(S.tired?'<span class="dn">지친 상태라 효과가 줄었다.</span>':'')+'</div>';
+}
+function vEvent(){
+  const steps=evSteps(),st=steps[S.step],last=S.log[S.log.length-1];
+  return(S.step===0?vDone():'')+'<section class="sheet">'+shd(cal().n)
+    +(S.step>0&&last?'<div class="prevres"><span>'+last.res+'</span>'+chips(last.fx)+'</div>':'')
+    +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+'</h3>'
+    +(st.text?'<p class="lead">'+st.text+'</p>':'')
+    +'<div class="opts">'+st.opts.map((o,i)=>'<button class="opt" data-a="choose" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+o.t+'</span>'+(o.tag?'<em class="tag">'+o.tag+'</em>':'')+'</span></button>').join('')+'</div></section>';
+}
+function examCard(e){
+  if(e.kind==='cert')return'<div class="exam"><h4>'+e.title+'</h4><p class="stamp '+(e.ok?'ok':'no')+'">'+(e.ok?'합격':'불합격')+'</p><p>'+e.msg+'</p></div>';
+  const school=e.kind==='school',diff=e.prev!=null?e.prev-e.avg:0;
+  const body=school?'<table class="gt"><tbody>'+e.subs.map(s=>'<tr><th scope="row">'+s.n+'</th><td>'+s.g+'<small>등급</small></td></tr>').join('')+'</tbody></table>'
+    :'<div class="gcells">'+e.subs.map(s=>'<div class="gc"><span>'+s.n+'</span><b>'+s.g+'<small>등급</small></b></div>').join('')+'</div>';
+  return'<div class="exam"><h4>'+e.title+'<small>'+(school?'5등급제 (1등급이 가장 높다)':'9등급제 (1등급이 가장 높다)')+'</small></h4>'+body
+    +'<p class="avg">평균<b class="circ">'+g1(e.avg)+'</b>등급'+(Math.abs(diff)>=0.05?'<span class="'+(diff>0?'up':'dn')+'">지난 시험보다 '+g1(Math.abs(diff))+'등급 '+(diff>0?'올랐다':'내려갔다')+'</span>':'')+'</p></div>';
+}
+function vResult(){
+  const R=S.res,c=cal();
+  let h='<section class="sheet">'+shd(c.n);
+  h+=S.log.map(l=>'<div class="res"><p class="res-q">'+l.q+'</p><p class="res-t">'+l.res+'</p>'+chips(l.fx)+'</div>').join('');
+  h+=R.exams.map(examCard).join('');
+  if(S.newRecs.length)h+='<div class="recnew"><b>학생부에 기록됐다</b><ul>'+S.newRecs.map(r=>'<li>'+r.cat+': '+r.text+'</li>').join('')+'</ul></div>';
+  if(S.burn)h+='<p class="note warn">체력이나 마음이 바닥났다. 다음 달은 쉬어 가야 한다.</p>';
+  const lbl=slot()===7&&year()<3?year()+'학년 종업식으로':(S.t===22?(S.path==='job'?'결과 발표로':'합격자 발표로'):'다음 달로');
+  return h+'<button class="btn" data-a="next" data-k="go">'+lbl+'</button></section>';
+}
+function vYearEnd(){
+  const y=year(),ex=S.exams.filter(e=>e.y===y),mk=S.mocks.filter(e=>e.y===y),d={};
+  hudKeys().forEach(k=>{const v=S.stats[k]-S.stY[k];if(v)d[k]=v;});
+  return'<section class="sheet">'+shd(y+'학년을 마치며',y+'학년 종업식')
+    +'<p class="lead">'+(y===1?'교실 뒤 사물함을 비웠다. 3월에는 낯설던 복도가 이제는 눈을 감고도 걷는다.':'2학년 교실에서 보내는 마지막 날. 다음에 이 계단을 오를 때는 3학년이다.')+'</p>'
+    +'<dl class="kv"><div><dt>내신 평균</dt><dd>'+(ex.length?g1(mean(ex.map(e=>e.avg))):'-')+'</dd></div><div><dt>모의고사 평균</dt><dd>'+(mk.length?g1(mean(mk.map(e=>e.avg))):'-')+'</dd></div><div><dt>학생부 기록</dt><dd>'+S.recs.filter(r=>r.y===y).length+'건</dd></div></dl>'
+    +'<h3 class="h3">1년 동안의 변화</h3><div>'+(chips(d)||'<span class="muted">큰 변화가 없었다.</span>')+'</div>'
+    +'<button class="btn" data-a="nextyear" data-k="go">'+(y+1)+'학년으로 올라간다</button></section>';
+}
+function vFinal(){
+  const f=S.fin,p=f.pages[S.fp];
+  const appList=(a,names)=>'<ul class="apps">'+a.map((x,i)=>'<li class="'+(x.pass?'ok':'no')+'"><span>'+(names?names[i]+' · ':'')+x.lv+' 지원</span><b>'+(x.pass?'합격':'불합격')+'</b>'+(x.why?'<small>'+x.why+'</small>':'')+'</li>').join('')+'</ul>';
+  const nextBtn='<button class="btn" data-a="fnext" data-k="go">다음</button>';
+  if(p==='susi')return'<section class="sheet">'+shd('수시 합격자 발표','3학년 12월')
+    +'<p class="lead">대학 홈페이지에 수험번호를 입력한다. 손끝이 차갑다.</p><p class="muted">지원 전형: '+TRACKN[f.key]+', 목표 학과: '+S.major+'</p>'+appList(f.susi)
+    +'<p class="res-t">'+(f.sb?'「'+S.major+'」 '+f.sb+' 지원 대학에 합격했다. 수시에 합격했으므로 정시에는 지원하지 않는다.':'여섯 곳 모두 합격 소식이 없다. 수능 성적으로 정시에 지원한다.')+'</p>'+nextBtn+'</section>';
+  if(p==='jeongsi')return'<section class="sheet">'+shd('정시 합격자 발표','3학년 2월')
+    +'<p class="lead">수능 성적표를 들고 가, 나, 다군에 한 곳씩 지원했다. 수능 평균 '+g1(S.csat.avg)+'등급.</p>'+appList(f.jeongsi,['가군','나군','다군'])
+    +'<p class="res-t">'+(f.jb?'「'+S.major+'」 '+f.jb+' 지원 대학에 합격했다.':'세 곳 모두 합격하지 못했다.')+'</p>'+nextBtn+'</section>';
+  if(p==='jobres'){
+    const o=f.lv!=='none'?outcome():null;
+    return'<section class="sheet">'+shd('채용 결과','3학년 12월')
+      +'<p class="lead">문자 알림이 울렸다. 화면을 켜기 전에 숨을 한 번 골랐다.</p>'
+      +'<p class="stamp '+(o?'ok':'no')+'">'+(o?'최종 합격':'불합격')+'</p>'
+      +'<p class="res-t">'+(o?S.job.n+' 분야, '+o.s+'. '+(S.cert===2?S.job.c+' 자격증과 실습 기록이 힘이 됐다.':'자격증은 아직 없지만 실습 태도와 면접 준비가 통했다.'):'이번 채용에서는 합격하지 못했다. 선생님은 졸업 뒤에도 이어지는 길이 여럿 있다고 했다.')+'</p>'+nextBtn+'</section>';
+  }
+  if(p==='contract')return'<section class="sheet">'+shd('근로계약서','입사 전')
+    +'<h3 class="q"><span class="qn">마지막 문제.</span>근로계약서를 받았다</h3><p class="lead">입사 전에 회사에서 계약서를 내밀었다. 임금, 근로 시간, 휴일이 적혀 있다.</p>'
+    +'<div class="opts"><button class="opt" data-a="fchoose" data-v="0" data-k="opt-0"><span class="on" aria-hidden="true">①</span><span><span class="ot">항목을 하나씩 확인하고 모르는 것은 묻는다</span></span></button>'
+    +'<button class="opt" data-a="fchoose" data-v="1" data-k="opt-1"><span class="on" aria-hidden="true">②</span><span><span class="ot">좋은 회사일 테니 바로 서명한다</span></span></button></div></section>';
+  if(p==='fallback'){
+    const o=f.kind==='college'?['1년 더 준비해 다시 도전한다','추가모집과 전문대학 전형을 알아본다','직업 훈련을 받으며 일을 먼저 시작한다']
+      :['졸업 후에도 취업 지원 프로그램으로 구직을 이어 간다','전문대학에 진학해 기술을 더 배운다','자격증을 보완해 내년 상반기 채용에 다시 지원한다'];
+    return'<section class="sheet">'+shd('다음 걸음','졸업 전')
+      +'<h3 class="q"><span class="qn">마지막 문제.</span>이제 어떻게 할까?</h3><p class="lead">이번에는 바라던 소식을 받지 못했다. 진로 선생님이 말했다. "결과가 끝은 아니야. 다음 걸음을 같이 정하자."</p>'
+      +'<div class="opts">'+o.map((t,i)=>'<button class="opt" data-a="fchoose" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+t+'</span></span></button>').join('')+'</div></section>';
+  }
+  const o=outcome();
+  return'<section class="sheet">'+shd('졸업식','3학년 2월')
+    +(f.note?'<div class="prevres"><span>'+f.note+'</span></div>':'')
+    +'<p class="lead">강당에는 3년 전 입학식 때와 같은 의자가 놓여 있다. 그때는 발이 바닥에 닿는지 신경 쓰였는데, 오늘은 옆자리 친구 얼굴이 먼저 보인다.</p>'
+    +'<p class="lead">'+(S.stats.rel>=60?'꽃다발보다 사진을 같이 찍자는 친구가 더 많았다. ':'')+'졸업 후의 길: <b>'+o.h+'</b>. '+o.s+'.</p>'
+    +'<button class="btn" data-a="fnext" data-k="go">졸업장을 받는다</button></section>';
+}
+function vEnding(){
+  const o=outcome(),tk=pickType(),t=TYPES[tk],keys=hudKeys(),g=aim();
+  const stats=keys.map(k=>{const a=S.st0[k]||0,b=S.stats[k],d=b-a;
+    return'<li><span>'+STN[k]+'</span><i class="bar"><i style="width:'+b+'%"></i><u style="left:'+a+'%"></u></i><em>'+a+' → <b>'+b+'</b></em></li>';}).join('');
+  const lab=e=>e.y+'학년 '+e.title.replace('고사','').replace(' 학력평가','').replace(' 모의평가','');
+  const flowS=S.exams.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('');
+  const flowM=S.mocks.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('')+(S.csat?'<i>수능<b>'+g1(S.csat.avg)+'</b></i>':'');
+  const recs=S.recs.length?S.recs.map(r=>'<li>'+r.y+'학년 '+r.cat+': '+r.text+'</li>').join(''):'<li>남은 기록이 없다.</li>';
+  return'<main class="wrap"><section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
+    +'<p>위 학생은 ASGS에서 3년의 과정을 모두 마쳤으므로 이 졸업장을 수여합니다.</p><span class="seal">ASGS</span></section>'
+    +'<section class="sheet"><h2 class="h3">졸업 후의 길</h2><p class="big">'+o.h+'</p><p class="big-s">'+o.s+'</p>'
+    +'<p class="muted">희망 분야: '+F[g].n+(S.flags.changed?' (2학년 때 방향을 바꿨다)':'')+'</p></section>'
+    +'<section class="sheet"><h2 class="h3">3년의 모습</h2><p class="big">'+t.n+'</p><p>'+t.d+'</p><p class="muted">'+t.tip+'</p></section>'
+    +'<section class="sheet"><h2 class="h3">능력치 변화 <span class="muted">(빨간 선은 입학 때)</span></h2><ul class="statrows">'+stats+'</ul>'
+    +(S.burns?'<p class="muted">번아웃으로 쉬어 간 달: '+S.burns+'번</p>':'')+'</section>'
+    +'<section class="sheet"><h2 class="h3">성적 흐름 <span class="muted">(평균 등급)</span></h2>'
+    +'<p class="muted">학교 시험, 5등급제</p><div class="flow">'+flowS+'</div>'
+    +(flowM?'<p class="muted">모의고사와 수능, 9등급제</p><div class="flow">'+flowM+'</div>':'')+'</section>'
+    +'<section class="sheet"><h2 class="h3">학생부에 남은 기록</h2><ul class="recnew" style="border:0;padding:0">'+recs+'</ul>'
+    +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 진로 탐색 '+((S.cnt.career||0)+(S.cnt.camp||0))+'번</p></section>'
+    +'<section class="sheet"><h2 class="h3">돌아보기</h2><ol class="reflect">'
+    +'<li>게임에서 한 선택 가운데 실제 나라면 다르게 했을 선택은 무엇인가?</li>'
+    +'<li>지금 내가 가장 끌리는 분야는 어디이고, 그 분야와 이어지는 선택과목은 무엇인가?</li>'
+    +'<li>이번 학기에 실제로 해 볼 수 있는 활동 한 가지를 적어 보자.</li></ol></section>'
+    +(UI.copy?'<section class="sheet"><p class="muted">'+(UI.copy==='ok'?'결과를 복사했다. 활동지나 설문에 붙여 넣으면 된다.':'자동 복사가 되지 않았다. 아래 글을 길게 눌러 복사한다.')+'</p><textarea class="copybox" id="copybox" readonly>'+esc(summaryText())+'</textarea></section>':'')
+    +'<div class="btnrow"><button class="btn line" data-a="copy" data-k="copy">결과 요약 복사</button><button class="btn" data-a="again" data-k="again">다른 3년 살아 보기</button></div></main>';
+}
+function vModal(){
+  let body='',title='';
+  if(UI.modal==='rec'){
+    title='학교생활기록부';const g=S.goal;
+    const cats=['자율·자치활동','동아리활동','진로활동','교과 탐구'];
+    body='<ul class="rows"><li><span>진로 희망</span><span>'+(g?F[g].n:'탐색 중')+(S.major?' · '+S.major:S.job?' · '+S.job.n+' 취업':'')+'</span></li>'
+      +'<li><span>동아리</span><span>'+(S.club?F[S.club].club:'미정')+'</span></li>'
+      +'<li><span>2학년 선택</span><span>'+(S.elect[2]?F[S.elect[2]].y2.join(', '):'1학년 2학기에 정한다')+'</span></li>'
+      +'<li><span>3학년 선택</span><span>'+(S.y3subs?S.y3subs.join(', '):'2학년 1학기에 정한다')+'</span></li>'
+      +(S.track?'<li><span>주력 전형</span><span>'+TRACKN[S.track]+'</span></li>':'')
+      +(S.path==='job'&&S.job?'<li><span>자격증</span><span>'+S.job.c+' '+(S.cert===2?'취득':S.cert===1?'필기 합격':'준비 중')+'</span></li>':'')+'</ul>'
+      +cats.map(c=>{const r=S.recs.filter(x=>x.cat===c);return'<h3 class="h3">'+c+'</h3><ul class="recnew" style="border:0;padding:0">'+(r.length?r.map(x=>'<li>'+x.y+'학년: '+x.text+'</li>').join(''):'<li class="muted">아직 기록이 없다.</li>')+'</ul>';}).join('')
+      +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 수행평가·탐구 '+(S.cnt.report||0)+'번</p>';
+  }else{
+    title='성적표';
+    const li=e=>'<li><b><span>'+e.y+'학년 '+e.title+'</span><span>평균 '+g1(e.avg)+'</span></b><small>'+e.subs.map(s=>s.n+' '+s.g).join(' · ')+'</small></li>';
+    body='<h3 class="h3">학교 시험 (5등급제)</h3><ul class="glist">'+(S.exams.length?S.exams.map(li).join(''):'<li class="muted">아직 치른 시험이 없다.</li>')+'</ul>'
+      +'<h3 class="h3">모의고사 (9등급제)</h3><ul class="glist">'+(S.mocks.length?S.mocks.concat(S.csat?[S.csat]:[]).map(li).join(''):'<li class="muted">아직 치른 시험이 없다.</li>')+'</ul>'
+      +'<p class="muted">등급은 숫자가 작을수록 높다. 학교 시험 1등급은 상위 10%, 모의고사 1등급은 상위 4%다.</p>';
+  }
+  return'<div class="scrim" data-a="closemodal"><div class="modal" role="dialog" aria-modal="true" aria-label="'+title+'"><div class="modal-hd"><h2>'+title+'</h2><button data-a="closemodal" data-k="m-close">닫기</button></div>'+body+'</div></div>';
+}
+function vGame(){
+  switch(S.phase){
+    case'plan':return vPlan();case'burn':return vBurn();case'event':return vEvent();case'result':return vResult();
+    case'yearend':return vYearEnd();case'final':return vFinal();
+  }
+  return'';
+}
+function render(top){
+  const app=document.getElementById('app'),ae=document.activeElement,fk=ae&&ae.dataset?ae.dataset.k:null;
+  let h;
+  if(UI.screen==='title'||!S&&UI.screen!=='char')h=vTitle();
+  else if(UI.screen==='char')h=vChar();
+  else if(S.phase==='ending')h=vEnding();
+  else h=vHud()+'<main class="wrap">'+vGame()+'</main>';
+  if(UI.modal&&S&&UI.screen==='game')h+=vModal();
+  app.innerHTML=h;
+  prev=S?Object.assign({},S.stats):null;
+  if(top)window.scrollTo(0,0);
+  else if(fk){const el=app.querySelector('[data-k="'+fk+'"]');if(el&&!el.disabled)el.focus({preventScroll:true});}
+}
+
+/* ---------- 입력 ---------- */
+const H={
+  tochar(){UI.screen='char';render(true);},
+  totitle(){UI.screen='title';UI.modal=null;render(true);},
+  resume(){const sv=loadSave();if(sv){S=sv;UI.screen='game';prev=null;render(true);}},
+  sel(v){UI.sel=v;render();},
+  start(){const el=document.getElementById('nm');const nm=(el?el.value:UI.name).trim().slice(0,8);newGame(UI.sel,nm);save();render(true);},
+  pick(v){const i=S.picks.indexOf(v);if(i>=0)S.picks.splice(i,1);else if(S.picks.length<3)S.picks.push(v);render();},
+  go(){if(S.picks.length<3)return;runPlan();save();render(true);},
+  burn(){runBurn();save();render(true);},
+  choose(v){choose(+v);save();render(true);},
+  next(){next();save();render(true);},
+  nextyear(){nextYear();save();render(true);},
+  fnext(){const f=S.fin;if(S.fp<f.pages.length-1)S.fp++;else S.phase='ending';save();render(true);},
+  fchoose(v){const f=S.fin,p=f.pages[S.fp];
+    if(p==='contract')f.note=+v===0?'임금과 근로 시간, 휴일을 확인하고 서명했다. 계약서 한 부는 내가 보관한다.':'서명하려는 순간 선생님 말이 떠올랐다. "계약서는 꼭 읽고, 한 부는 네가 가지고 있어야 해." 처음부터 다시 읽고 서명했다.';
+    else{f.fb=+v;f.note='다음 걸음을 정했다. 정하고 나니 마음이 조금 가벼워졌다.';}
+    S.fp++;save();render(true);},
+  modal(v){UI.modal=v;render();const b=document.querySelector('[data-k="m-close"]');if(b)b.focus();},
+  closemodal(){const m=UI.modal;UI.modal=null;render();const b=document.querySelector('[data-k="m-'+m+'"]');if(b)b.focus();},
+  copy(){const txt=summaryText();const done=ok=>{UI.copy=ok?'ok':'fail';render();if(!ok){const b=document.getElementById('copybox');if(b){b.focus();b.select();}}};
+    try{navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));}catch(e){done(false);}},
+  again(){clearSave();S=null;UI.copy='';UI.name='';UI.screen='char';render(true);}
+};
+document.getElementById('app').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
+  if(b.dataset.a==='closemodal'&&b.classList.contains('scrim')&&e.target!==b)return;
+  const fn=H[b.dataset.a];if(fn)fn(b.dataset.v);
+});
+document.getElementById('app').addEventListener('input',e=>{if(e.target.id==='nm')UI.name=e.target.value;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&UI.modal)H.closemodal();});
+
+function boot(data){
+  if(data&&data.S){S=data.S;UI.screen=data.screen||'game';}
+  render(true);
+}
+try{if(window.claude&&window.claude.hot&&window.claude.hot.snapshot)window.claude.hot.snapshot(()=>({S,screen:UI.screen}));}catch(e){}
+try{
+  if(window.claude&&window.claude.hot&&window.claude.hot.ready)window.claude.hot.ready(boot);
+  else boot((window.claude&&window.claude.hot&&window.claude.hot.data)||{});
+}catch(e){boot({});}
+})();
+</script>
+</body>
+</html>
