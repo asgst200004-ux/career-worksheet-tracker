@@ -137,13 +137,13 @@ i{font-style:normal}
 .scene{display:block}
 .scn{position:relative;margin:-18px -16px 0;aspect-ratio:20/9;overflow:hidden;border-radius:2px 2px 0 0;background:var(--grid)}
 .scn.solo{margin:0;border:1px solid var(--line);border-radius:3px}
-.scn .scene,.kv .scene{position:absolute;inset:0;width:100%;height:100%}
+.scn .scene,.kvis .scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
 .who{position:absolute;aspect-ratio:240/300;width:auto;filter:drop-shadow(1.5px 0 0 var(--sticker)) drop-shadow(-1.5px 0 0 var(--sticker)) drop-shadow(0 -1.5px 0 var(--sticker)) drop-shadow(0 4px 6px var(--shade))}
 .scn .who{right:4%;bottom:-10%;height:106%}
 .hero{display:flex;flex-direction:column}
-.kv{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:4px 4px 0 0;margin-bottom:-10px;background:var(--grid)}
-.kv .who{bottom:-3%;height:80%}
-.kv .who.l{left:5%} .kv .who.r{right:5%}
+.kvis{position:relative;aspect-ratio:16/10;overflow:hidden;border-radius:4px 4px 0 0;margin-bottom:-10px;background:var(--grid)}
+.kvis .who{bottom:-3%;height:80%}
+.kvis .who.l{left:5%} .kvis .who.r{right:5%}
 .hero .bb{position:relative}
 .idp{display:block;width:100%;max-width:132px;aspect-ratio:1/1.12;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:linear-gradient(var(--id1),var(--id2))}
 .idp svg,.idp .ph{display:block;width:100%;height:auto;margin-top:6%}
@@ -1145,8 +1145,12 @@ function sceneWork(seed){
   return h+sClose(u);
 }
 const sceneCache={};
+const SCENE_IMG={'gate:spring':'img/bg-gate-summer.webp','gate:summer':'img/bg-gate-summer.webp','gate:autumn':'img/bg-gate-autumn.webp','gate:winter':'img/bg-gate-winter.webp',
+  'class:autumn':'img/bg-class-autumn.webp','class:winter':'img/bg-class-winter.webp'};
 function sceneSvg(k){
   if(sceneCache[k])return sceneCache[k];
+  const im=SCENE_IMG[k.split(':').slice(0,2).join(':')];
+  if(im)return sceneCache[k]='<img class="scene" src="'+im+'" alt="" decoding="async" draggable="false">';
   const p=k.split(':');let h;
   switch(p[0]){
     case'gate':h=sceneGate(p[1]);break;case'class':h=sceneClass(p[1],p[2]==='1');break;case'field':h=sceneField();break;
@@ -1193,7 +1197,7 @@ function shd(title,left){return'<div class="shd"><span class="shd-m">'+(left||(y
 function vTitle(){
   const sv=loadSave();let rs='';
   if(sv&&sv.phase!=='ending'){const y=Math.floor(sv.t/8)+1;rs='<button class="btn ghost" data-a="resume">이어서 하기 ('+esc(sv.name)+', '+y+'학년)</button>';}
-  return'<main class="wrap"><div class="hero"><div class="kv">'+sceneSvg('gate:spring')+chara('f',{cls:'who l'})+chara('m',{cls:'who r',ex:'happy'})+'</div><section class="bb"><p class="bb-date">3월 2일 월요일 · 주번: 나</p>'
+  return'<main class="wrap"><div class="hero"><div class="kvis">'+sceneSvg('gate:spring')+chara('f',{cls:'who l'})+chara('m',{cls:'who r',ex:'happy'})+'</div><section class="bb"><p class="bb-date">3월 2일 월요일 · 주번: 나</p>'
     +'<h1 class="bb-title"><span>ASGS</span> 고교 3년</h1>'
     +'<p class="bb-sub">입학식부터 졸업식까지.<br>시험, 모의고사, 동아리, 진로 결정을 내가 고른다.</p>'
     +'<div class="bb-btns"><button class="btn chalk" data-a="tochar">입학하기</button>'+rs+'</div></section></div>'
