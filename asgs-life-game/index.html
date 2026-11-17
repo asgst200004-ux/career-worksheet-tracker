@@ -153,6 +153,23 @@ i{font-style:normal}
 .phf{display:block;overflow:hidden;border-radius:50%}
 .phf img{display:block;width:100%;max-width:none;transform:scale(2.3);transform-origin:50% 33%}
 
+/* 직업 카드 */
+.jnew{display:flex;flex-direction:column;gap:6px}
+.jcard{display:flex;flex-direction:column;gap:2px;border:1.5px solid var(--ink);border-radius:3px;padding:9px 11px;background:var(--sheet);font-size:13.5px;line-height:1.5}
+.jcard .jf{font-size:11.5px;font-weight:700;color:var(--red)}
+.jcard b{font-family:var(--f-display);font-size:20px;font-weight:700;line-height:1.3}
+.jcard small{font-size:12px;color:var(--muted)}
+.jbook{display:flex;flex-direction:column;gap:6px;font-size:12.5px}
+.jrow{display:grid;grid-template-columns:5.6em minmax(0,1fr);gap:6px;align-items:start}
+.jrow>span{color:var(--muted);padding-top:3px}
+.jrow>div{display:flex;flex-wrap:wrap;gap:4px}
+.jrow i{border:1px dashed var(--line);border-radius:2px;padding:1px 6px;color:var(--muted);min-width:2.2em;text-align:center}
+.jrow i.on{border-style:solid;border-color:var(--ink);color:var(--ink);font-weight:700}
+.jlist{display:flex;flex-direction:column;font-size:13.5px;margin-top:8px}
+.jlist li{padding:6px 0;border-bottom:1px dotted var(--line)}
+.jlist b{font-weight:700}
+.jlist small{display:block;font-size:12px;color:var(--muted)}
+
 /* 상태판 */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--board);color:var(--chalk);border-bottom:6px solid var(--wood)}
 .hud-in{max-width:560px;margin:0 auto;padding-block:9px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:8px}
@@ -258,10 +275,11 @@ i{font-style:normal}
 <script>
 (function(){
 'use strict';
-const SAVE_KEY='asgs3y-v2';
+const SAVE_KEY='asgs3y-v3';
 let S=null, prev=null;
 const UI={screen:'title',sel:'f',name:'',modal:null,copy:'',mb:{}};
 
+function qj(w,a,b){w=String(w);const c=w.charCodeAt(w.length-1),q='「'+w+'」';if(c<0xAC00||c>0xD7A3)return q+b;const t=(c-0xAC00)%28;if(a==='으로')return q+(t===0||t===8?b:a);return q+(t?a:b);}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const rnd=(a,b)=>a+Math.random()*(b-a);
 const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
@@ -387,7 +405,138 @@ const ACTS=[
   {id:'rest',ic:'🛌',n:'푹 쉬기',d:'잠, 취미, 아무것도 안 하기',fx:{mind:7,hp:6}}
 ];
 const ACT={};ACTS.forEach(a=>ACT[a.id]=a);
+
+const JOBS={
+  hum:[['기자','사건과 사람을 취재해 기사와 영상으로 전한다.','언어와 매체, 사회와 문화'],['통번역가','외국어로 된 말과 글을 우리말로, 우리말을 외국어로 옮긴다.','영어, 제2외국어'],['학예사','박물관과 미술관에서 유물을 연구하고 전시를 기획한다.','한국사, 세계사'],['변호사','법률 지식으로 의뢰인의 권리를 지키고 소송을 맡는다.','법과 사회, 정치'],['출판편집자','원고를 다듬고 디자인과 제작을 이끌어 책으로 만든다.','문학, 독서와 작문'],['외교관','다른 나라와 협상하고 해외에 있는 국민을 보호한다.','국제 관계의 이해, 영어']],
+  sci:[['소프트웨어 개발자','사람들이 쓰는 앱과 프로그램을 설계하고 만든다.','정보, 인공지능 기초'],['데이터 분석가','쌓인 데이터에서 규칙을 찾아 결정에 필요한 근거를 만든다.','확률과 통계, 정보'],['기계공학 기술자','자동차, 로봇, 발전기 같은 기계를 설계하고 시험한다.','물리학, 역학과 에너지'],['건축가','쓰는 사람을 생각하며 건물을 설계하고 공사를 관리한다.','기하, 미술'],['환경공학 기술자','물, 공기, 쓰레기 문제를 기술로 해결한다.','화학, 지구시스템과학'],['로봇공학자','스스로 움직이고 판단하는 로봇을 연구하고 만든다.','물리학, 정보']],
+  med:[['간호사','환자의 상태를 살피고 치료와 회복을 돕는다.','생명과학, 화학'],['물리치료사','운동과 기구로 다친 몸의 기능을 되찾게 돕는다.','생명과학, 운동과 건강'],['임상병리사','혈액과 조직을 검사해 병을 진단할 근거를 만든다.','화학, 생명과학'],['약사','약을 조제하고 바르게 먹는 방법을 알려 준다.','화학, 생명과학'],['응급구조사','사고 현장에서 응급처치를 하고 병원까지 이송한다.','생명과학, 체육'],['생명공학 연구원','유전자와 세포를 연구해 새 치료법과 기술을 만든다.','생물의 유전, 화학']],
+  biz:[['회계사','기업의 돈 흐름을 기록하고 장부가 정확한지 검토한다.','경제 수학, 경제'],['마케터','사람들이 원하는 것을 조사해 상품을 알리는 방법을 짠다.','경제, 사회와 문화'],['금융자산운용가','고객의 돈을 주식, 채권 등에 나누어 투자하고 관리한다.','확률과 통계, 경제'],['물류관리사','물건이 창고에서 소비자까지 가는 길을 계획하고 관리한다.','경제, 정보'],['창업가','문제를 해결할 아이디어로 회사를 세우고 키운다.','경제, 사회문제 탐구'],['세무사','세금 신고를 대신하고 세법에 맞게 상담한다.','경제 수학, 법과 사회']],
+  edu:[['초등학교 교사','초등학생에게 여러 교과를 가르치고 생활을 돌본다.','교육학, 국어'],['사회복지사','도움이 필요한 사람을 찾아 복지 서비스와 연결한다.','사회와 문화, 윤리'],['상담심리사','이야기를 들으며 마음의 어려움을 함께 풀어 간다.','심리학, 윤리와 사상'],['특수교사','장애가 있는 학생에게 맞춤 교육을 계획하고 가르친다.','교육학, 생명과학'],['청소년지도사','청소년 수련관에서 체험과 활동 프로그램을 운영한다.','사회와 문화, 체육'],['직업상담사','구직자의 적성을 살피고 일자리와 훈련 정보를 안내한다.','사회와 문화, 경제']],
+  art:[['영상 편집자','촬영한 장면을 자르고 이어 붙여 이야기를 만든다.','매체 의사소통, 미술'],['시각디자이너','포스터, 로고, 화면을 보기 좋고 알기 쉽게 디자인한다.','미술, 미술 창작'],['웹툰 작가','이야기를 짜고 그림으로 연재한다.','문학, 미술'],['음향 엔지니어','공연과 방송, 영상의 소리를 녹음하고 다듬는다.','음악, 물리학'],['스포츠 트레이너','선수와 회원의 몸 상태에 맞게 운동을 지도한다.','스포츠 생활, 생명과학'],['공연 기획자','공연을 기획하고 예산과 홍보, 무대를 총괄한다.','음악, 경제']]
+};
+const JOBN=FKEYS.reduce((n,k)=>n+JOBS[k].length,0);
+function jobField(){
+  if(Math.random()<.65)return aim();
+  const o=FKEYS.slice().sort((a,b)=>S.int[b]-S.int[a]);return o[Math.floor(Math.random()*3)];
+}
+function unlockJob(f,src){
+  const pool=JOBS[f].filter(j=>!S.jobs.includes(j[0]));if(!pool.length)return null;
+  const j=pool[Math.floor(Math.random()*pool.length)];S.jobs.push(j[0]);
+  const card={f,n:j[0],d:j[1],s:j[2],src:src||'ev'};S.newJobs.push(card);return card;
+}
+function jobInfo(n){for(const k of FKEYS)for(const j of JOBS[k])if(j[0]===n)return{f:k,n:j[0],d:j[1],s:j[2]};return null;}
+const otherFields=(n)=>(S.revF||[]).filter(k=>k!==aim()).slice(0,n);
+const REV=[
+  {id:'lecture',w:c=>c.y<3&&!c.vac,t:'진로의 날 직업인 특강',x:()=>'진로의 날이다. 교실마다 다른 직업인이 와서 자기 일을 이야기한다. 한 곳만 들을 수 있다.',
+    o:()=>[aim()].concat(otherFields(2)).map(k=>({t:F[k].n+' 분야 직업인 교실',tag:k===aim()?'내 관심 분야':'',run(){S.int[k]+=1;const j=unlockJob(k,'ev');
+      return{fx:{car:3},res:j?''+qj(j.n,'으로','로')+' 일하는 분의 이야기를 들었다. "'+j.d+'" 생각했던 것보다 해야 할 공부가 많았다.':'이미 아는 직업이었지만 현장 이야기는 처음 듣는 것이 많았다.'};}}))},
+  {id:'freerider',w:c=>!c.vac&&!c.job3,t:'조별 과제에 손 놓은 조원',x:()=>'수행평가 조별 과제 마감이 사흘 남았다. 한 조원이 단체 대화방에 답이 없다.',
+    o:()=>[{t:'내가 그 몫까지 다 한다',fx:{ns:2,mind:-4,hp:-2},res:'과제는 제때 냈다. 혼자 밤을 새운 게 내내 억울했다.'},
+      {t:'그 조원에게 따로 연락해 맡을 부분을 다시 나눈다',fx:{rel:3,act:2,mind:-1},res:'"사실 집에 일이 좀 있었어." 작은 부분이라도 맡겠다고 했다. 마지막 날 자료를 보내왔다.'},
+      {t:'선생님께 상황을 말씀드린다',fx:{ns:1,rel:-1,mind:1},res:'선생님이 역할을 다시 나눠 주셨다. 조원과는 조금 어색해졌다.'}]},
+  {id:'phone',w:()=>true,t:'멈추지 않는 짧은 영상',x:()=>'잠깐 쉬려고 연 짧은 영상 앱. 정신을 차려 보니 두 시간이 지났다. 이번 주에만 세 번째다.',
+    o:()=>[{t:'앱 사용 시간을 하루 40분으로 제한한다',fx:{mind:2,ns:1},res:'처음 사흘은 손이 자꾸 휴대폰으로 갔다. 일주일이 지나자 밤이 길어졌다.'},
+      {t:'공부할 때는 휴대폰을 다른 방에 둔다',fx:{ns:2,sn:1,mind:-1},res:'처음에는 불안했다. 대신 한 시간 동안 한 번도 고개를 들지 않았다.'},
+      {t:'쉬는 것도 필요하다며 그대로 둔다',fx:{mind:2,hp:-3,ns:-2},res:'잠드는 시간이 점점 늦어졌다. 아침 조회 시간에 하품이 멈추지 않았다.'}]},
+  {id:'compare',w:c=>c.t>=5&&!c.job3,t:'벌써 진로를 정한 친구',x:()=>'짝이 말했다. "나 간호학과로 정했어. 봉사도 병원으로 다니고 있어." 나는 아직 잘 모르겠다.',
+    o:()=>[{t:'조급한 마음에 나도 비슷한 쪽으로 정해 버린다',fx:{car:-2,mind:-2},res:'정하고 나니 마음은 편해졌다. 그런데 내가 고른 건지 잘 모르겠다.'},
+      {t:'친구에게 어떻게 정했는지 물어본다',fx:{car:4,rel:2},res:'"병원 봉사를 하다가 알게 됐어." 직접 해 본 경험이 답이 됐다고 했다.'},
+      {t:'나는 내 속도대로 가기로 마음먹는다',fx:{mind:3,car:1},res:'진로는 달리기 시합이 아니다. 대신 다음 달에 해 볼 일 하나를 적어 두었다.'}]},
+  {id:'parent',w:c=>c.y>=2,t:'저녁 식탁의 진로 이야기',x:()=>'"그래서 어느 쪽으로 갈 건데?" 부모님 생각과 내 생각이 조금 다르다.',
+    o:()=>[{t:'내 생각과 이유를 정리해서 말씀드린다',fx:{car:4,mind:1,rel:1},res:'끝까지 들어 주셨다. "그렇게 생각한 이유가 있구나." 다 설득되지는 않았지만 이야기가 시작됐다.'},
+      {t:'일단 부모님 뜻을 따르겠다고 한다',fx:{mind:-4},res:'대화는 빨리 끝났다. 방에 들어와서도 마음이 무거웠다.'},
+      {t:'진로 선생님과 셋이 함께하는 상담을 신청한다',fx:{car:5,rel:1,mind:1},run(){rec('진로활동','보호자와 함께하는 진로 상담 참여');},res:'선생님이 내 활동 기록을 보여 드렸다. 부모님이 몰랐던 내 모습을 보셨다.'}]},
+  {id:'trip',w:c=>c.y===2&&(c.s===1||c.s===2),t:'2학년 수학여행',x:()=>'2박 3일 수학여행. 버스에 오르자마자 반 분위기가 들뜬다.',
+    o:()=>[{t:'친구들과 실컷 추억을 만든다',fx:{rel:6,mind:6,hp:-3},res:'밤새 이야기하다 새벽에 잠들었다. 3년 뒤에도 이날 이야기를 할 것 같다.'},
+      {t:'반 사진과 영상 기록을 맡는다',fx:{act:3,rel:3,mind:2},run(){rec('자율·자치활동','수학여행 학급 기록 담당');},res:'돌아오는 버스에서 3분짜리 영상을 틀었다. 반 전체가 박수를 쳤다.'},
+      {t:'숙소에서 틈틈이 문제집을 푼다',fx:{sn:2,rel:-3,mind:-1},res:'문제집은 한 단원 나갔다. 단체 사진에는 내가 없었다.'}]},
+  {id:'debate',w:c=>!c.vac&&c.y<3,t:'교내 독서토론 대회',x:()=>'교내 독서토론 대회 참가자를 모집한다. 지정 도서는 세 권이다.',
+    o:()=>[{t:'친구와 팀을 꾸려 참가한다',run(){const ok=Math.random()<.3+S.stats.act/250;S.cnt.read=(S.cnt.read||0)+3;
+        if(ok)rec('교과 탐구','교내 독서토론 대회 입상');
+        return{fx:{act:4,car:2,mind:-2},res:ok?'결선에서 반박을 끝까지 해냈다. 장려상을 받았다.':'예선에서 떨어졌다. 그래도 지정 도서 세 권을 다 읽었다.'};}},
+      {t:'지정 도서만 읽어 본다',fx:{sn:2,mind:1},run(){S.cnt.read=(S.cnt.read||0)+1;},res:'한 권을 읽었다. 대회 날 다른 팀 토론을 들으며 내 생각과 비교했다.'},
+      {t:'시험공부가 먼저다',fx:{ns:2},res:'대회 공지를 접었다.'}]},
+  {id:'parttime',w:c=>c.y>=2&&c.vac,t:'방학 단기 아르바이트',x:()=>'동네 편의점에 단기 아르바이트 자리가 났다. 사장님이 다음 주부터 나올 수 있느냐고 묻는다.',
+    o:()=>[{t:'근로계약서를 쓰고 일해 본다',fx:{skill:2,car:3,rel:1,hp:-3},res:'보호자 동의서와 가족관계증명서를 내고 근로계약서를 두 부 써서 한 부를 받았다. 시급이 최저임금보다 낮지 않은지도 확인했다.'},
+      {t:'방학에는 공부에 집중한다',fx:{ns:2,sn:2},res:'아르바이트는 졸업한 뒤에 해 보기로 했다.'},
+      {t:'보호자와 상의해서 주말에만 한다',fx:{skill:1,car:2,hp:-1},res:'주말 이틀만 일하기로 했다. 첫 월급으로 가족 저녁을 샀다.'}]},
+  {id:'expo',w:c=>c.y===2&&!c.vac,t:'진로 박람회 체험의 날',x:()=>'시청 체육관에서 진로 박람회가 열린다. 학과와 직업 부스가 백 개가 넘는다.',
+    o:()=>[{t:'관심 분야 부스를 깊게 돈다',run(){const j=unlockJob(aim(),'ev');S.int[aim()]+=1;return{fx:{car:4},res:j?'「'+j.n+'」 부스에서 체험을 했다. 관련 과목으로 '+j.s+'을 추천받았다.':'관심 분야 부스를 모두 돌았다. 아는 것이 많아서 질문이 더 깊어졌다.'};}},
+      {t:'처음 보는 분야 부스를 골고루 돈다',run(){const ks=otherFields(2),js=ks.map(k=>{S.int[k]+=1;return unlockJob(k,'ev');}).filter(Boolean);
+        return{fx:{car:3,mind:1},res:js.length?js.map(j=>'「'+j.n+'」').join(', ')+' 부스를 처음 알게 됐다. 생각지 못한 분야가 재미있었다.':'여러 분야 부스를 돌았다.'};}},
+      {t:'사은품만 챙기고 일찍 나온다',fx:{mind:2},res:'볼펜이 다섯 자루 생겼다.'}]},
+  {id:'mentor',w:c=>c.y===2&&c.s<=3&&!!S.club,t:'동아리에 들어온 후배',x:()=>F[S.club].club+'에 1학년 후배들이 들어왔다. 동아리 부장이 신입생 멘토를 맡아 달라고 한다.',
+    o:()=>[{t:'멘토를 맡는다',fx:{act:4,rel:3,mind:-2},run(){rec('동아리활동',F[S.club].club+' 신입생 멘토');},res:'1년 전 내가 몰랐던 것들을 정리해 알려 주었다. 가르치면서 나도 다시 배웠다.'},
+      {t:'사양하고 내 활동에 집중한다',fx:{act:1,mind:1},res:'다른 친구가 멘토를 맡았다.'}]},
+  {id:'listen',w:()=>true,t:'쉬는 시간의 고민 상담',x:()=>'친한 친구가 조용히 말을 건다. "요즘 다 그만두고 싶어."',
+    o:()=>[{t:'수업 종이 울려도 끝까지 들어 준다',fx:{rel:5,mind:-1},res:'"들어 줘서 고마워." 친구 얼굴이 조금 풀렸다.'},
+      {t:'힘내라고 말하고 넘어간다',fx:{rel:1},res:'친구는 고개를 끄덕였다. 오후 내내 마음에 걸렸다.'},
+      {t:'Wee 클래스 상담 선생님께 함께 가 보자고 한다',fx:{rel:4,car:1},res:'혼자 가기 어렵다던 친구와 상담실 앞까지 같이 갔다. 친구가 먼저 문을 열었다.'}]},
+  {id:'mc',w:c=>!c.vac&&!c.job3,t:'행사 사회를 맡아 줄래?',x:()=>'학교 행사 사회자가 갑자기 아프다. 담당 선생님이 나에게 부탁한다.',
+    o:()=>[{t:'떨리지만 해 본다',run(){rec('자율·자치활동','학교 행사 사회 진행');const i=S.mb[0]==='I';
+        return{fx:{act:4,rel:3,mind:i?-3:1},res:i?'무대에 서기 전까지 손이 차가웠다. 끝나고 나니 해냈다는 마음이 더 컸다.':'마이크를 잡자 오히려 신이 났다. 즉석에서 분위기도 띄웠다.'};}},
+      {t:'대본 정리와 진행 보조를 맡겠다고 한다',fx:{act:2,rel:1},res:'무대 뒤에서 순서표를 들고 뛰어다녔다. 행사는 무사히 끝났다.'},
+      {t:'정중히 거절한다',fx:{mind:1},res:'선생님은 다른 학생을 찾았다.'}]},
+  {id:'present',w:c=>c.y<3&&!c.vac&&!c.job3,t:'교내 진로 탐구 발표대회',x:()=>'교내 진로 탐구 발표대회 안내가 붙었다. 관심 분야를 조사해 10분 동안 발표한다. 교외 대회 수상은 학생부에 쓸 수 없지만 교내 대회는 기록된다.',
+    o:()=>[{t:'관심 분야 주제로 참가한다',run(){const ok=Math.random()<.25+S.stats.act/300+S.stats.car/400;
+        if(ok)rec('진로활동','교내 진로 탐구 발표대회 입상('+F[aim()].n+')');
+        return{fx:{act:5,car:3,mind:-3,hp:-2},res:ok?'질문에 막힘없이 답했다. 우수상을 받았다.':'수상은 못 했다. 심사평에 "주제를 끝까지 파고든 점이 좋다"고 적혀 있었다.'};}},
+      {t:'친구 발표 자료 만들기를 돕는다',fx:{rel:3,act:1},res:'친구가 상을 받았다. 같이 기뻐했다.'},
+      {t:'이번에는 넘긴다',fx:{},res:'다음 학기에 다시 열린다고 한다.'}]},
+  {id:'teacher',w:c=>c.y>=2&&!c.vac&&!c.job3,t:'교과 선생님의 질문',x:()=>'수업이 끝나고 선생님이 부른다. "이번 단원에서 더 궁금했던 거 있니?"',
+    o:()=>[{t:'궁금했던 점을 더 찾아 정리해 간다',fx:{act:4,ns:1,mind:-1},run(){rec('교과 탐구','교과 수업 후속 탐구 보고서 제출');},res:'두 쪽짜리 보고서를 냈다. 선생님이 참고 자료를 하나 더 알려 주셨다.'},
+      {t:'딱히 없다고 한다',fx:{},res:'"그래, 생기면 언제든 와." 선생님이 웃으셨다.'},
+      {t:'친구와 같이 질문 목록을 만들어 간다',fx:{act:2,rel:2},res:'질문 다섯 개를 들고 갔다. 셋은 선생님도 같이 찾아보자고 하셨다.'}]},
+  {id:'test',w:c=>c.y===1&&c.s>=1&&c.s<=6,t:'진로 심리검사 결과지',x:()=>'진로 시간에 직업흥미검사를 했다. 결과지가 나왔다.',
+    o:()=>[{t:'결과를 꼼꼼히 읽고 추천 직업을 찾아본다',run(){const k=topInt();S.int[k]+=1;const j=unlockJob(k,'ev');
+        return{fx:{car:4},res:'흥미가 가장 높게 나온 쪽은 '+qj(F[k].n,'이었다','였다')+'. 지금까지 내가 시간을 쓴 쪽과 비슷했다.'+(j?' 추천 직업 가운데 '+qj(j.n,'을','를')+' 찾아보았다.':'')};}},
+      {t:'결과가 나와 안 맞는 것 같다',fx:{car:2},res:'"검사는 참고 자료야. 안 맞는 부분이 왜 그런지 생각해 보는 것도 공부야." 선생님 말을 결과지 옆에 적었다.'},
+      {t:'친구들과 결과를 비교하며 웃는다',fx:{rel:3},res:'서로 전혀 다른 결과가 나왔다. 그래서 더 재미있었다.'}]},
+  {id:'flu',w:c=>c.s===6||c.s===7||(c.y===3&&c.s>=5),t:'독감 유행',x:()=>'반에서 독감으로 결석한 친구가 다섯 명이다.',
+    o:()=>[{t:'손 씻기, 마스크, 일찍 자기를 챙긴다',fx:{hp:3,mind:1},res:'귀찮았지만 끝까지 지켰다. 독감은 비켜 갔다.'},
+      {t:'신경 쓰지 않는다',run(){const sick=Math.random()<.5;return sick?{fx:{hp:-10,ns:-2},res:'결국 나도 독감에 걸려 사흘을 앓았다.'}:{fx:{},res:'운 좋게 지나갔다.'};}}]},
+  {id:'late',w:c=>!c.vac,t:'이번 달 세 번째 지각',x:()=>'알람을 끄고 다시 잠들었다. 이번 달에만 세 번째 지각이다.',
+    o:()=>[{t:'자는 시간을 30분 앞당긴다',fx:{hp:3,mind:1},res:'밤 12시에 휴대폰을 충전기에 꽂고 누웠다.'},
+      {t:'알람을 다섯 개 맞춘다',fx:{hp:-1},res:'지각은 안 했다. 대신 아침마다 알람 다섯 개와 싸웠다.'},
+      {t:'담임 선생님께 사정을 말씀드리고 생활 계획을 세운다',fx:{rel:2,mind:2},res:'선생님이 아침 시간표를 같이 짜 주셨다.'}]},
+  {id:'book',w:()=>true,t:'선생님이 건넨 책 한 권',x:()=>'진로 선생님이 '+F[aim()].n+' 분야 책 한 권을 건넨다. "네 생각이 나서 골랐어."',
+    o:()=>[{t:'끝까지 읽고 독서 기록을 남긴다',run(){S.cnt.read=(S.cnt.read||0)+1;S.int[aim()]+=1;rec('진로활동','진로 독서('+F[aim()].n+' 분야)와 독서 기록');const j=unlockJob(aim(),'ev');
+        return{fx:{car:3,sn:1,mind:1},res:'밑줄 친 문장을 독서 기록장에 옮겼다.'+(j?' 책 속에 나온 '+qj(j.n,'이라는','라는')+' 직업이 궁금해졌다.':'')};}},
+      {t:'앞부분만 읽고 책장에 꽂아 둔다',fx:{car:1},res:'언젠가 다시 펼칠지도 모른다.'}]},
+  {id:'bond',w:c=>(c.s===0||c.s===1)&&!c.job3,t:'학급 단합 활동',x:()=>'반 단합 활동으로 무엇을 할지 학급 회의가 열렸다.',
+    o:()=>[{t:'반 대항 피구를 제안한다',fx:{rel:3,hp:1,mind:2},res:'목이 쉬도록 응원했다. 처음으로 반이 하나가 된 느낌이었다.'},
+      {t:'서로에게 롤링페이퍼 쓰기를 제안한다',fx:{rel:3,mind:3},res:'내 종이에 "말은 적어도 늘 챙겨 줘서 고마워"라는 글이 있었다.'},
+      {t:'다수 의견을 따른다',fx:{rel:1},res:'결국 영화를 함께 봤다.'}]},
+  {id:'slump',w:c=>c.y===3&&!c.job3&&c.s>=1&&c.s<=5,t:'고3 슬럼프',x:()=>'모의고사 점수가 몇 달째 그대로다. 책상에 앉아도 손에 잡히지 않는다.',
+    o:()=>[{t:'오답 노트 중심으로 공부 방법을 바꾼다',fx:{sn:3,mind:-1},res:'틀린 문제만 모았더니 같은 유형이 반복됐다. 약한 곳이 보이기 시작했다.'},
+      {t:'하루를 통째로 쉬고 산책한다',fx:{mind:6,hp:3,sn:-1},res:'오랜만에 하늘을 봤다. 다음 날 머리가 조금 맑았다.'},
+      {t:'담임 선생님과 상담한다',fx:{mind:4,car:2},res:'"지금 제자리인 건 떨어지지 않고 버틴다는 뜻이기도 해." 그 말을 플래너 첫 장에 적었다.'}]},
+  {id:'volunteer',w:c=>c.vac&&!c.job3,t:'지역아동센터 학습 봉사',x:()=>'방학 동안 지역아동센터에서 초등학생 숙제를 도와줄 봉사자를 구한다.',
+    o:()=>[{t:'2주 동안 봉사한다',run(){S.cnt.vol=(S.cnt.vol||0)+2;rec('자율·자치활동','지역아동센터 학습 봉사(8시간)');const j=unlockJob('edu','ev');
+        return{fx:{act:3,rel:3,hp:-2},res:'구구단을 못 외우던 아이가 마지막 날 다 외웠다며 자랑했다.'+(j?' 센터 선생님께 '+qj(j.n,'이','가')+' 하는 일을 들었다.':'')};}},
+      {t:'다음 기회로 미룬다',fx:{mind:1},res:'방학 계획표에 다른 일을 적었다.'}]},
+  {id:'senior',w:c=>c.job3,t:'현장 선배와의 멘토링',x:()=>'위탁 교육기관에서 '+(S.job?S.job.n:'관련')+' 분야에서 일하는 졸업생 선배를 초청했다.',
+    o:()=>[{t:'실제 하루 일과와 힘든 점을 묻는다',run(){const j=unlockJob(aim(),'ev');return{fx:{car:4},res:'"처음 석 달이 제일 힘들어. 그 뒤로는 손이 기억해."'+(j?' 선배 회사에는 「'+j.n+'」도 함께 일한다고 했다.':'')};}},
+      {t:'자격증 준비 요령을 묻는다',fx:{skill:3},res:'선배가 실기시험에서 자주 감점되는 부분을 짚어 주었다.'},
+      {t:'면접에서 무엇을 보는지 묻는다',fx:{car:2},run(){S.flags.iv=1;},res:'"성실하게 끝까지 하는 사람인지 봐. 실습 기록을 가져가." 메모해 두었다.'}]}
+];
+function pickRev(){
+  if(Math.random()>.6)return;
+  const c=ctx(),pool=REV.filter(r=>!S.usedEv.includes(r.id)&&r.w(c));
+  if(!pool.length)return;
+  const r=pool[Math.floor(Math.random()*pool.length)];S.rev=r.id;S.usedEv.push(r.id);S.revF=FKEYS.slice().sort(()=>Math.random()-.5);
+}
 const HAPS=[
+  {t:'학교 앞 분식집 사장님이 떡볶이를 덤으로 주셨다.',fx:{mind:2}},
+  {t:'비 오는 날 우산을 같이 쓴 친구와 친해졌다.',fx:{rel:3}},
+  {t:'모의고사 오답 노트가 한 권이 됐다.',fx:{sn:2}},
+  {t:'체육 시간 피구에서 마지막까지 살아남았다.',fx:{mind:3,hp:1}},
+  {t:'급식 줄에서 다른 반 친구와 진로 이야기를 나눴다.',fx:{car:2,rel:1}},
+  {t:'담임 선생님이 상담 시간에 내 장점을 적어 주셨다.',fx:{mind:4}},
+  {t:'주말에 가족과 가까운 곳으로 나들이를 다녀왔다.',fx:{mind:4,hp:2}},
+  {t:'필기한 공책을 잃어버려 다시 정리해야 했다.',fx:{ns:-1,mind:-2}},
+  {t:'버스에서 졸다가 정류장을 두 개 지나쳤다.',fx:{hp:-2}},
+  {t:'작년 담임 선생님이 복도에서 이름을 불러 주셨다.',fx:{mind:3,rel:1}},
   {t:'환절기 감기에 걸려 며칠을 앓았다.',fx:{hp:-6}},
   {t:'수업 시간 발표를 선생님이 칭찬해 주셨다.',fx:{mind:4}},
   {t:'새벽까지 짧은 영상을 보다가 며칠 동안 잠이 부족했다.',fx:{hp:-4,ns:-1}},
@@ -435,16 +584,17 @@ function checkBurn(){if(S.stats.hp<=0||S.stats.mind<=0)S.burn=true;}
 
 function newGame(ch,name,mb){
   const C=CHARS[ch],st=Object.assign({skill:0},BASE);
-  S={v:2,ch,mb,value:null,lastPicks:null,mbGain:0,fitN:0,pickN:0,name:name||C.name,t:0,phase:'plan',step:0,stats:st,st0:Object.assign({},st),stY:Object.assign({},st),
+  S={v:3,ch,mb,value:null,lastPicks:null,mbGain:0,fitN:0,pickN:0,jobs:[],newJobs:[],usedEv:[],rev:null,name:name||C.name,t:0,phase:'plan',step:0,stats:st,st0:Object.assign({},st),stY:Object.assign({},st),
     int:{hum:0,sci:0,med:0,biz:0,edu:0,art:0},club:null,goal:null,path:null,major:null,job:null,track:null,strat:null,jstrat:null,
     elect:{2:null,3:null},el3:null,y3subs:null,exams:[],mocks:[],csat:null,cert:0,recs:[],newRecs:[],cnt:{},flags:{},
     picks:[],planFx:null,planNames:[],tired:false,hap:null,log:[],res:null,burn:false,burns:0,fin:null,fp:0};
   UI.screen='game';startTurn();
 }
 function startTurn(){
-  S.picks=[];S.planFx=null;S.planNames=[];S.log=[];S.res=null;S.step=0;S.hap=null;S.newRecs=[];S.tired=false;S.mbGain=0;
+  S.picks=[];S.planFx=null;S.planNames=[];S.log=[];S.res=null;S.step=0;S.hap=null;S.newRecs=[];S.tired=false;S.mbGain=0;S.newJobs=[];S.rev=null;
   if(cal().fin){runFinal();return;}
   if(S.t>0&&!S.burn&&Math.random()<0.35){const h=HAPS[Math.floor(Math.random()*HAPS.length)];S.hap={t:h.t,fx:apply(h.fx,{raw:true})};}
+  if(S.t>0&&!S.burn)pickRev();
   S.phase=S.burn?'burn':'plan';
 }
 function runPlan(){
@@ -454,6 +604,7 @@ function runPlan(){
     if(id==='club'&&S.club)S.int[S.club]+=1;
     if(id==='career'||id==='camp'||id==='read')S.int[aim()]+=id==='read'?0.5:1;
   });
+  S.picks.forEach(id=>{if(id==='career'||id==='camp'||(id==='read'&&Math.random()<.5))unlockJob(jobField(),'plan');});
   const drift=c.vac?{hp:4,mind:3,ns:-1,sn:-1,rel:-1}:{hp:-2,mind:c.y===3?-5:-4,ns:-2,sn:-2,rel:-1};
   if(c.job3){delete drift.ns;delete drift.sn;}
   add(tot,apply(drift,{raw:true}));
@@ -580,6 +731,11 @@ function intro(){
   return T[year()+'-'+slot()]||'';
 }
 function evSteps(){
+  const b=baseSteps();
+  if(S.rev){const r=REV.find(x=>x.id===S.rev);if(r)b.push({title:r.t,text:r.x(),opts:r.o(),small:1});}
+  return b;
+}
+function baseSteps(){
   const y=year(),s=slot(),g=aim(),top=topInt(),job=S.path==='job';
   const fieldOpts=(mk)=>FKEYS.map(k=>mk(k));
   switch(y+'-'+s+(y===3&&job?'j':'')){
@@ -603,9 +759,9 @@ function evSteps(){
     {t:'읽고 싶던 책을 쌓아 두고 읽는다',fx:{mind:5,sn:2,car:2},run(){S.cnt.read=(S.cnt.read||0)+3;},res:'세 권을 읽었다. 한 권은 밑줄을 그어 가며 두 번 읽었다.'}]}];
   case '1-5':return[{title:'2학년 선택과목을 무엇으로 채울까?',text:'과목 안내 책자를 받았다. 고교학점제에서는 2학년부터 시간표를 내가 만든다. 여기서 고른 과목은 2학년 성적표에 나온다.',
     opts:fieldOpts(k=>({t:F[k].n+' 중심 · 「'+F[k].y2[0]+'」「'+F[k].y2[1]+'」',tag:k===top?'내 관심 1순위':'',run(){S.elect[2]=k;S.int[k]+=2;const m=k===top;
-      return{fx:m?{car:4}:{car:1},res:'「'+F[k].y2[0]+'」와 「'+F[k].y2[1]+'」를 신청했다. '+(m?'관심 분야와 이어지는 과목이라 수업이 기다려진다.':'지금까지의 활동과는 다른 분야다. 새로운 가능성을 열어 두었다.')};}}))
+      return{fx:m?{car:4}:{car:1},res:''+qj(F[k].y2[0],'과','와')+' '+qj(F[k].y2[1],'을','를')+' 신청했다. '+(m?'관심 분야와 이어지는 과목이라 수업이 기다려진다.':'지금까지의 활동과는 다른 분야다. 새로운 가능성을 열어 두었다.')};}}))
     .concat([{t:'친한 친구가 고른 과목을 그대로 따라 신청한다',run(){const o=FKEYS.filter(k=>k!==top),k=o[Math.floor(Math.random()*o.length)];S.elect[2]=k;S.flags.followed=1;
-      return{fx:{rel:2,car:-2},res:'친구를 따라 「'+F[k].y2[0]+'」와 「'+F[k].y2[1]+'」를 신청했다. 같은 교실이라 든든하다. 수업이 나와 맞을지는 아직 모른다.'};}}])}];
+      return{fx:{rel:2,car:-2},res:'친구를 따라 '+qj(F[k].y2[0],'과','와')+' '+qj(F[k].y2[1],'을','를')+' 신청했다. 같은 교실이라 든든하다. 수업이 나와 맞을지는 아직 모른다.'};}}])}];
   case '1-6':return[{title:'축제 기간을 어떻게 보낼까?',text:'강당에 무대가 서고 교실마다 부스가 들어선다.',opts:[
     {t:'동아리 부스 운영을 맡는다',fx:{act:5,rel:2,hp:-3},run(){rec('동아리활동',F[S.club].club+' 축제 부스 기획·운영');},res:'준비한 체험 활동에 줄이 길게 섰다. 다리는 아팠지만 뿌듯했다.'},
     {t:'무대 공연에 나간다',fx:{rel:4,mind:4,act:2},res:'조명이 켜지자 머리가 하얘졌다. 박수 소리를 듣고 나서야 숨을 쉬었다.'},
@@ -637,7 +793,7 @@ function evSteps(){
     {t:'관심 직업의 현장을 찾아가 일하는 사람을 인터뷰한다',fx:{car:7,act:2},run(){S.flags.sawJob=1;S.int[g]+=1;rec('진로활동','직업인 인터뷰 보고서 작성');},res:'책에서 본 것과 달랐다. 힘든 점도 보람도 직접 들었다.'},
     {t:'독서실에서 부족한 과목을 메운다',fx:{ns:4,sn:5,mind:-5,hp:-3},res:'하루 열 시간씩 앉아 있었다. 개학 날 거울 속 얼굴이 조금 지쳐 보였다.'}]}];
   case '2-5':return[
-    {title:'어느 분야로 갈까?',html:intBars(),text:'상담실. 진로 선생님과 2년 동안의 활동 기록을 펼쳐 놓았다.'+(S.value?' 1학년 때 고른 가치관은 「'+S.value+'」이었다.':''),
+    {title:'어느 분야로 갈까?',html:intBars(),text:'상담실. 진로 선생님과 2년 동안의 활동 기록을 펼쳐 놓았다.'+(S.value?' 1학년 때 고른 가치관은 '+qj(S.value,'이었다','였다')+'.':''),
       opts:fieldOpts(k=>({t:F[k].n,tag:k===S.goal?'지금까지의 목표':(k===top?'활동 기록 1순위':''),run(){const same=!S.goal||S.goal===k;S.goal=k;if(!same)S.flags.changed=1;
         return same?{fx:{car:3},res:'「'+F[k].n+'」 분야로 방향이 더 또렷해졌다.'}:{fx:{car:1,mind:2},res:'「'+F[k].n+'」 분야로 방향을 바꿨다. 늦은 것이 아니라 해 보고 알게 된 것이다.'};}}))},
     {title:'졸업하면 바로 무엇을 할까?',text:'"대학에 가는 길도 있고, 기술을 배워 먼저 일하는 길도 있어. 어느 쪽이든 나중에 바꿀 수 있어."',opts:[
@@ -647,7 +803,7 @@ function evSteps(){
     job?{title:'어떤 일을 배울까?',text:F[S.goal].n+' 분야의 위탁과정 목록이다. 과정마다 준비하는 자격증이 다르다.',
       opts:F[S.goal].jobs.map(j=>({t:j.n+' · 준비 자격증: '+j.c,fx:{car:3},run(){S.job=j;S.major=null;},res:'「'+j.n+'」 과정에 지원서를 냈다.'}))}
     :{title:'어느 학과를 목표로 할까?',text:F[S.goal||g].n+' 분야의 학과 목록이다. 지금 고른 학과는 3학년 때 지원 목표가 된다.',
-      opts:F[S.goal||g].majors.map(m=>({t:m,fx:{car:3},run(){S.major=m;S.job=null;},res:'목표를 「'+m+'」로 적었다.'}))}];
+      opts:F[S.goal||g].majors.map(m=>({t:m,fx:{car:3},run(){S.major=m;S.job=null;},res:'목표를 '+qj(m,'으로','로')+' 적었다.'}))}];
   case '2-6':return[{title:'손이 움직이지 않는다',text:'성적은 제자리인데 해야 할 일은 늘어난다. 책상에 앉아도 집중이 되지 않는다.',opts:[
     {t:'담임 선생님께 솔직하게 이야기한다',fx:{mind:6,car:2},res:'"다들 이맘때 그래." 그 한마디에 어깨가 조금 내려갔다.'},
     {t:'공부 시간을 기록해 보고 방법을 바꾼다',fx:{ns:3,sn:3,mind:1},res:'앉아 있던 시간과 실제로 공부한 시간이 달랐다. 과목 순서를 바꿨다.'},
@@ -814,13 +970,14 @@ function summaryText(){
     '내신 평균: '+(nsAvg()?g1(nsAvg())+'등급':'-')+' / 모의고사 평균: '+(mkAvg()?g1(mkAvg())+'등급':'-')+(S.csat?' / 수능 평균: '+g1(S.csat.avg)+'등급':''),
     '희망 분야: '+F[g].n+(S.major?' ('+S.major+')':S.job?' ('+S.job.n+')':''),
     '선택과목: 2학년 '+F[S.elect[2]||g].y2.join(', ')+' / 3학년 '+(S.y3subs||F[g].y3).join(', '),
-    '학생부 기록: '+S.recs.length+'건, 독서 '+(S.cnt.read||0)+'권, 봉사 '+((S.cnt.vol||0)*4)+'시간'];
+    '학생부 기록: '+S.recs.length+'건, 독서 '+(S.cnt.read||0)+'권, 봉사 '+((S.cnt.vol||0)*4)+'시간',
+    '직업 카드: '+S.jobs.length+'/'+JOBN+'장'+(S.jobs.length?' ('+S.jobs.join(', ')+')':'')];
   return L.join('\n');
 }
 
 /* ---------- 저장 ---------- */
 function save(){try{if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S));}catch(e){}}
-function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return null;const o=JSON.parse(r);return o&&o.v===2&&o.stats&&o.mb?o:null;}catch(e){return null;}}
+function loadSave(){try{const r=localStorage.getItem(SAVE_KEY);if(!r)return null;const o=JSON.parse(r);return o&&o.v===3&&o.stats&&o.mb?o:null;}catch(e){return null;}}
 function clearSave(){try{localStorage.removeItem(SAVE_KEY);}catch(e){}}
 
 /* ---------- 화면 ---------- */
@@ -1240,6 +1397,14 @@ function vHud(){
     +'<div class="gauges">'+gs+'</div></div></header>';
 }
 function fitTag(id){const l=fitLetters(id);return l.length?'<em class="fit">'+l.join('·')+' 잘 맞음</em>':'';}
+function jobsHtml(src){
+  const l=S.newJobs.filter(j=>j.src===src);if(!l.length)return'';
+  return'<div class="jnew">'+l.map(j=>'<div class="jcard"><span class="jf">새 직업 카드 · '+F[j.f].n+'</span><b>'+j.n+'</b><span>'+j.d+'</span><small>관련 과목: '+j.s+'</small></div>').join('')+'</div>';
+}
+function jobsBook(){
+  return'<h3 class="h3">직업 카드 도감 <span class="muted">'+S.jobs.length+' / '+JOBN+'</span></h3><div class="jbook">'+FKEYS.map(k=>'<div class="jrow"><span>'+F[k].n+'</span><div>'+JOBS[k].map(j=>S.jobs.includes(j[0])?'<i class="on" title="'+j[1]+'">'+j[0]+'</i>':'<i>?</i>').join('')+'</div></div>').join('')+'</div>'
+    +'<p class="muted">진로 탐색, 진로 체험, 독서를 하거나 특강·박람회 같은 일을 겪으면 카드가 생긴다.</p>';
+}
 function slotsHtml(){return[0,1,2].map(i=>{const a=ACT[S.picks[i]];return'<span class="slot'+(a?' on':'')+'">'+(a?a.n:'비어 있음')+'</span>';}).join('');}
 function vPlan(){
   const c=ctx(),list=ACTS.filter(a=>!a.when||a.when(c)),tired=S.stats.hp<30||S.stats.mind<30;
@@ -1266,6 +1431,7 @@ function vBurn(){
 function vDone(){
   if(!S.planFx)return'';
   return'<div class="done"><span><b>이번 달 한 일</b> '+S.planNames.join(', ')+'</span>'+chips(S.planFx)
+    +jobsHtml('plan')
     +(S.mbGain?'<span class="up">내 성향('+S.mb+')에 맞는 방식이라 마음이 '+S.mbGain+' 덜 지쳤다.</span>':'')
     +(S.tired?'<span class="dn">지친 상태라 효과가 줄었다.</span>':'')+'</div>';
 }
@@ -1273,7 +1439,7 @@ function vEvent(){
   const steps=evSteps(),st=steps[S.step],last=S.log[S.log.length-1];
   return(S.step===0?vDone():'')+sheetOpen()+shd(cal().n)
     +(S.step>0&&last?'<div class="prevres"><span>'+last.res+'</span>'+chips(last.fx)+'</div>':'')
-    +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+'</h3>'
+    +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+(st.small?'<em>작은 사건</em>':'')+'</h3>'
     +(st.text?'<p class="lead">'+st.text+'</p>':'')+(st.html||'')
     +'<div class="opts">'+st.opts.map((o,i)=>'<button class="opt" data-a="choose" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+o.t+'</span>'+(o.tag?'<em class="tag">'+o.tag+'</em>':'')+'</span></button>').join('')+'</div></section>';
 }
@@ -1289,6 +1455,7 @@ function vResult(){
   const R=S.res,c=cal();
   let h=sheetOpen()+shd(c.n);
   h+=S.log.map(l=>'<div class="res"><p class="res-q">'+l.q+'</p><p class="res-t">'+l.res+'</p>'+chips(l.fx)+'</div>').join('');
+  h+=jobsHtml('ev');
   h+=R.exams.map(examCard).join('');
   if(S.newRecs.length)h+='<div class="recnew"><b>학생부에 기록됐다</b><ul>'+S.newRecs.map(r=>'<li>'+r.cat+': '+r.text+'</li>').join('')+'</ul></div>';
   if(S.burn)h+='<p class="note warn">체력이나 마음이 바닥났다. 다음 달은 쉬어 가야 한다.</p>';
@@ -1358,12 +1525,14 @@ function vEnding(){
     +'<section class="sheet"><h2 class="h3">성적 흐름 <span class="muted">(평균 등급)</span></h2>'
     +'<p class="muted">학교 시험, 5등급제</p><div class="flow">'+flowS+'</div>'
     +(flowM?'<p class="muted">모의고사와 수능, 9등급제</p><div class="flow">'+flowM+'</div>':'')+'</section>'
+    +'<section class="sheet">'+jobsBook().replace('<h3 class="h3">','<h2 class="h3">').replace('</h3>','</h2>')+(S.jobs.length?'<ul class="jlist">'+S.jobs.map(n=>{const j=jobInfo(n);return'<li><b>'+n+'</b> '+j.d+' <small>'+j.s+'</small></li>';}).join('')+'</ul>':'')+'</section>'
     +'<section class="sheet"><h2 class="h3">학생부에 남은 기록</h2><ul class="recnew" style="border:0;padding:0">'+recs+'</ul>'
     +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 진로 탐색 '+((S.cnt.career||0)+(S.cnt.camp||0))+'번</p></section>'
     +'<section class="sheet"><h2 class="h3">돌아보기</h2><ol class="reflect">'
     +'<li>게임에서 고른 성향과 실제 나는 어떤 점이 같고 어떤 점이 다른가?</li>'
     +'<li>게임 속 흥미 1순위 분야와 내가 실제로 끌리는 분야는 같은가? 그 분야와 이어지는 선택과목은 무엇인가?</li>'
     +'<li>내가 고른 가치관은 실제로 직업을 고를 때도 가장 중요한 기준인가?</li>'
+    +'<li>모은 직업 카드 가운데 더 알아보고 싶은 직업 하나를 골라, 그 직업을 가지려면 어떤 과목과 경험이 필요한지 찾아보자.</li>'
     +'<li>이번 학기에 실제로 해 볼 수 있는 활동 한 가지를 적어 보자.</li></ol></section>'
     +(UI.copy?'<section class="sheet"><p class="muted">'+(UI.copy==='ok'?'결과를 복사했다. 활동지나 설문에 붙여 넣으면 된다.':'자동 복사가 되지 않았다. 아래 글을 길게 눌러 복사한다.')+'</p><textarea class="copybox" id="copybox" readonly>'+esc(summaryText())+'</textarea></section>':'')
     +'<div class="btnrow"><button class="btn line" data-a="copy" data-k="copy">결과 요약 복사</button><button class="btn" data-a="again" data-k="again">다른 3년 살아 보기</button></div></main>';
@@ -1380,6 +1549,7 @@ function vModal(){
       +(S.track?'<li><span>주력 전형</span><span>'+TRACKN[S.track]+'</span></li>':'')
       +(S.path==='job'&&S.job?'<li><span>자격증</span><span>'+S.job.c+' '+(S.cert===2?'취득':S.cert===1?'필기 합격':'준비 중')+'</span></li>':'')+'</ul>'
       +cats.map(c=>{const r=S.recs.filter(x=>x.cat===c);return'<h3 class="h3">'+c+'</h3><ul class="recnew" style="border:0;padding:0">'+(r.length?r.map(x=>'<li>'+x.y+'학년: '+x.text+'</li>').join(''):'<li class="muted">아직 기록이 없다.</li>')+'</ul>';}).join('')
+      +jobsBook()
       +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 수행평가·탐구 '+(S.cnt.report||0)+'번</p>';
   }else{
     title='성적표';
