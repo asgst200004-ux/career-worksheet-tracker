@@ -346,6 +346,12 @@ body::before{background:rgba(26,20,30,.7)}
 .opt.pic .pd2{display:block;font-size:12.5px;color:var(--muted)}
 .opt.pic .tag{display:inline-block;margin:4px 0 0}
 .opt.wide{grid-column:1/-1}
+@media (max-width:999px){
+  .opts.pics.n3{grid-template-columns:1fr}
+  .opts.pics.n3 .opt.pic{flex-direction:row;align-items:stretch}
+  .opts.pics.n3 .opt.pic .pimg{width:40%;flex:none;aspect-ratio:4/3;height:auto}
+  .opts.pics.n3 .opt.pic .pt{align-content:center}
+}
 @media (min-width:1000px){.opts.pics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1000px){.hud-in{max-width:600px;margin-left:calc(max(1vw,50% - 640px) + min(62vh,570px));margin-right:auto}}
 </style>
@@ -879,9 +885,9 @@ function baseSteps(){
       opts:fieldOpts(k=>({t:F[k].n,tag:k===S.goal?'지금까지의 목표':(k===top?'활동 기록 1순위':''),run(){const same=!S.goal||S.goal===k;S.goal=k;if(!same)S.flags.changed=1;
         return same?{fx:{car:3},res:'「'+F[k].n+'」 분야로 방향이 더 또렷해졌다.'}:{fx:{car:1,mind:2},res:'「'+F[k].n+'」 분야로 방향을 바꿨다. 늦은 것이 아니라 해 보고 알게 된 것이다.'};}}))},
     {title:'졸업하면 바로 무엇을 할까?',text:'"대학에 가는 길도 있고, 기술을 배워 먼저 일하는 길도 있어. 어느 쪽이든 나중에 바꿀 수 있어."',opts:[
-      {t:'대학에 진학해 더 배운다',fx:{car:2},run(){S.path='college';},res:'진학으로 정했다.'},
-      {t:'기술을 배워 먼저 취업한다 (3학년 직업교육 위탁과정 신청)',fx:{car:3},run(){S.path='job';rec('진로활동','3학년 직업교육 위탁과정 신청');},res:'취업으로 정했다. 3학년 1년 동안 위탁 교육기관에서 직업 교육을 받는다.'},
-      {t:'아직 정하지 못했다. 진학을 준비하면서 더 알아본다',fx:{mind:1},run(){S.path='college';S.flags.undecided=1;},res:'일단 진학을 준비하면서 길을 열어 두기로 했다.'}]},
+      {pic:'college',t:'대학에 진학해 더 배운다',fx:{car:2},run(){S.path='college';},res:'진학으로 정했다.'},
+      {pic:'job',t:'기술을 배워 먼저 취업한다 · 3학년 직업교육 위탁과정 신청',fx:{car:3},run(){S.path='job';rec('진로활동','3학년 직업교육 위탁과정 신청');},res:'취업으로 정했다. 3학년 1년 동안 위탁 교육기관에서 직업 교육을 받는다.'},
+      {pic:'undecided',t:'아직 정하지 못했다 · 진학을 준비하면서 더 알아본다',fx:{mind:1},run(){S.path='college';S.flags.undecided=1;},res:'일단 진학을 준비하면서 길을 열어 두기로 했다.'}]},
     job?{title:'어떤 일을 배울까?',text:F[S.goal].n+' 분야의 위탁과정 목록이다. 과정마다 준비하는 자격증이 다르다.',
       opts:F[S.goal].jobs.map(j=>({t:j.n+' · 준비 자격증: '+j.c,fx:{car:3},run(){S.job=j;S.major=null;},res:'「'+j.n+'」 과정에 지원서를 냈다.'}))}
     :{title:'어느 학과를 목표로 할까?',text:F[S.goal||g].n+' 분야의 학과 목록이다. 지금 고른 학과는 3학년 때 지원 목표가 된다.',
@@ -900,9 +906,9 @@ function baseSteps(){
     {t:'아침 운동과 정해진 공부 시간으로 생활 리듬을 만든다',fx:{hp:6,mind:4,ns:2,sn:2},res:'같은 시간에 일어나고 같은 시간에 잤다. 몸이 먼저 적응했다.'}]}];
   case '3-0':{const sc=trackScores(),best=['jonghap','gyogwa','jeongsi'].sort((a,b)=>sc[b]-sc[a])[0];
     return[{title:'어느 전형에 무게를 둘까?',text:'담임 선생님이 성적표와 학생부를 함께 본다. 내신 평균 '+g1(nsAvg())+'등급, 최근 모의고사 평균 '+g1(sc.mk)+'등급, 활동 '+S.stats.act+', 진로 '+S.stats.car+'. "목표는 「'+S.major+'」. 어디에 힘을 실을지 정하자."',opts:[
-      {t:'학생부종합전형 · 내신과 함께 활동, 진로 이야기를 본다',tag:best==='jonghap'?'선생님 추천':'',fx:{car:2},run(){S.track='jonghap';},res:'학생부종합전형을 중심에 두기로 했다. 남은 한 학기의 수업과 활동이 모두 기록이 된다.'},
-      {t:'학생부교과전형 · 내신 등급이 가장 중요하다',tag:best==='gyogwa'?'선생님 추천':'',fx:{car:2},run(){S.track='gyogwa';},res:'학생부교과전형을 중심에 두기로 했다. 수능 최저학력기준이 있는 곳이 많아 수능 공부도 놓을 수 없다.'},
-      {t:'수능 위주 전형(정시) · 수능 점수로 지원한다',tag:best==='jeongsi'?'선생님 추천':'',fx:{car:2},run(){S.track='jeongsi';},res:'정시를 중심에 두기로 했다. 11월 하루의 시험을 위해 1년을 쓴다.'}]}];}
+      {pic:'jonghap',t:'학생부종합전형 · 내신과 함께 활동, 진로 이야기를 본다',tag:best==='jonghap'?'선생님 추천':'',fx:{car:2},run(){S.track='jonghap';},res:'학생부종합전형을 중심에 두기로 했다. 남은 한 학기의 수업과 활동이 모두 기록이 된다.'},
+      {pic:'gyogwa',t:'학생부교과전형 · 내신 등급이 가장 중요하다',tag:best==='gyogwa'?'선생님 추천':'',fx:{car:2},run(){S.track='gyogwa';},res:'학생부교과전형을 중심에 두기로 했다. 수능 최저학력기준이 있는 곳이 많아 수능 공부도 놓을 수 없다.'},
+      {pic:'jeongsi',t:'수능 위주 전형(정시) · 수능 점수로 지원한다',tag:best==='jeongsi'?'선생님 추천':'',fx:{car:2},run(){S.track='jeongsi';},res:'정시를 중심에 두기로 했다. 11월 하루의 시험을 위해 1년을 쓴다.'}]}];}
   case '3-1':return[{title:'친구와 서먹해졌다',text:'예민해진 교실에서 사소한 말 한마디로 친한 친구와 다퉜다.',opts:[
     {t:'쉬는 시간에 먼저 말을 건다',fx:{rel:5,mind:3},res:'"미안, 나도 예민했어." 둘 다 같은 말을 했다.'},
     {t:'당분간 거리를 두고 공부에 집중한다',fx:{ns:2,rel:-3,mind:-1},res:'문제집은 넘어가는데 옆자리가 자꾸 신경 쓰였다.'},
@@ -1514,15 +1520,16 @@ function vDone(){
     +(S.mbGain?'<span class="up">내 성향('+S.mb+')에 맞는 방식이라 마음이 '+S.mbGain+' 덜 지쳤다.</span>':'')
     +(S.tired?'<span class="dn">지친 상태라 효과가 줄었다.</span>':'')+'</div>';
 }
-const OPT_IMG={hum:'img/opt-hum.webp',sci:'img/opt-sci.webp',med:'img/opt-med.webp',biz:'img/opt-biz.webp',edu:'img/opt-edu.webp',art:'img/opt-art.webp'};
-const PIC_TINT={hum:'#E7D7C3',sci:'#CFE3EE',med:'#DCEFE6',biz:'#F1E2C4',edu:'#F4DCE0',art:'#E2DAF0'};
+const OPT_IMG={hum:'img/opt-hum.webp',sci:'img/opt-sci.webp',med:'img/opt-med.webp',biz:'img/opt-biz.webp',edu:'img/opt-edu.webp',art:'img/opt-art.webp',college:'img/opt-college.webp'};
+const PIC_LABEL={college:'대학 진학',job:'먼저 취업',undecided:'아직 고민 중',jonghap:'학생부종합',gyogwa:'학생부교과',jeongsi:'수능(정시)'};
+const PIC_TINT={college:'#F6DCE3',job:'#DCE6F0',undecided:'#E3EEDC',jonghap:'#EDE0F2',gyogwa:'#F3E8CF',jeongsi:'#D9E4EC',hum:'#E7D7C3',sci:'#CFE3EE',med:'#DCEFE6',biz:'#F1E2C4',edu:'#F4DCE0',art:'#E2DAF0'};
 function optsHtml(opts,act){
   const pics=opts.some(o=>o.pic);
-  return'<div class="opts'+(pics?' pics':'')+'">'+opts.map((o,i)=>{
+  return'<div class="opts'+(pics?' pics'+(opts.length===3?' n3':''):'')+'">'+opts.map((o,i)=>{
     const tag=o.tag?'<em class="tag">'+o.tag+'</em>':'';
     if(pics&&o.pic){
       const im=OPT_IMG[o.pic],t=o.t.split(' · ');
-      const top=im?'<img class="pimg" src="'+im+'" alt="" loading="lazy">':'<span class="pimg ph-c" style="background:'+(PIC_TINT[o.pic]||'#EEE')+'">'+F[o.pic].n+'</span>';
+      const top=im?'<img class="pimg" src="'+im+'" alt="" loading="lazy">':'<span class="pimg ph-c" style="background:'+(PIC_TINT[o.pic]||'#EEE')+'">'+((F[o.pic]||{}).n||PIC_LABEL[o.pic]||'')+'</span>';
       return'<button class="opt pic" data-a="'+act+'" data-v="'+i+'" data-k="opt-'+i+'">'+top+'<span class="pt"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><b>'+t[0]+'</b>'+(t[1]?'<span class="pd2">'+t.slice(1).join(' · ')+'</span>':'')+tag+'</span></span></button>';
     }
     return'<button class="opt'+(pics?' wide':'')+'" data-a="'+act+'" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+o.t+'</span>'+tag+'</span></button>';
