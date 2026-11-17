@@ -337,6 +337,16 @@ body::before{background:rgba(26,20,30,.7)}
   .title .who2.l{left:max(-6%,calc(50% - 780px))} .title .who2.r{right:max(-6%,calc(50% - 780px))}
 }
 .wrap.plain{padding-top:24px}
+.opts.pics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.opt.pic{display:flex;flex-direction:column;padding:0;overflow:hidden;text-align:left}
+.opt.pic .pimg{display:flex;align-items:center;justify-content:center;width:100%;max-width:none;aspect-ratio:4/3;object-fit:cover}
+.opt.pic .ph-c{font-family:var(--f-display);font-weight:700;font-size:20px;color:rgba(43,39,48,.62)}
+.opt.pic .pt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px;padding:9px 10px 11px;font-size:14px;line-height:1.45}
+.opt.pic .pt b{display:block;font-size:15px;font-weight:700}
+.opt.pic .pd2{display:block;font-size:12.5px;color:var(--muted)}
+.opt.pic .tag{display:inline-block;margin:4px 0 0}
+.opt.wide{grid-column:1/-1}
+@media (min-width:1000px){.opts.pics{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:1000px){.hud-in{max-width:600px;margin-left:calc(max(1vw,50% - 640px) + min(62vh,570px));margin-right:auto}}
 </style>
 </head>
@@ -500,7 +510,7 @@ function jobInfo(n){for(const k of FKEYS)for(const j of JOBS[k])if(j[0]===n)retu
 const otherFields=(n)=>(S.revF||[]).filter(k=>k!==aim()).slice(0,n);
 const REV=[
   {id:'lecture',w:c=>c.y<3&&!c.vac,t:'진로의 날 직업인 특강',x:()=>'진로의 날이다. 교실마다 다른 직업인이 와서 자기 일을 이야기한다. 한 곳만 들을 수 있다.',
-    o:()=>[aim()].concat(otherFields(2)).map(k=>({t:F[k].n+' 분야 직업인 교실',tag:k===aim()?'내 관심 분야':'',run(){S.int[k]+=1;const j=unlockJob(k,'ev');
+    o:()=>[aim()].concat(otherFields(2)).map(k=>({pic:k,t:F[k].n+' 분야 직업인 교실',tag:k===aim()?'내 관심 분야':'',run(){S.int[k]+=1;const j=unlockJob(k,'ev');
       return{fx:{car:3},res:j?''+qj(j.n,'으로','로')+' 일하는 분의 이야기를 들었다. "'+j.d+'" 생각했던 것보다 해야 할 공부가 많았다.':'이미 아는 직업이었지만 현장 이야기는 처음 듣는 것이 많았다.'};}}))},
   {id:'freerider',w:c=>!c.vac&&!c.job3,t:'조별 과제에 손 놓은 조원',x:()=>'수행평가 조별 과제 마감이 사흘 남았다. 한 조원이 단체 대화방에 답이 없다.',
     o:()=>[{t:'내가 그 몫까지 다 한다',fx:{ns:2,mind:-4,hp:-2},res:'과제는 제때 냈다. 혼자 밤을 새운 게 내내 억울했다.'},
@@ -809,7 +819,7 @@ function evSteps(){
 }
 function baseSteps(){
   const y=year(),s=slot(),g=aim(),top=topInt(),job=S.path==='job';
-  const fieldOpts=(mk)=>FKEYS.map(k=>mk(k));
+  const fieldOpts=(mk)=>FKEYS.map(k=>Object.assign({pic:k},mk(k)));
   switch(y+'-'+s+(y===3&&job?'j':'')){
   case '1-0':return[{title:'어느 동아리에 들어갈까?',text:'동아리 홍보 주간이다. 복도마다 포스터가 붙었고 선배들이 신입생을 불러 세운다. 1년 동안 활동할 동아리를 정해야 한다.',
     opts:fieldOpts(k=>({t:F[k].club+' · '+F[k].cd,fx:{act:3,rel:2},run(){S.club=k;S.int[k]+=2;rec('동아리활동',F[k].club+' 가입');},res:'「'+F[k].club+'」에 들어갔다. 첫 모임에서 어색하게 자기소개를 했다.'}))}];
@@ -1504,13 +1514,27 @@ function vDone(){
     +(S.mbGain?'<span class="up">내 성향('+S.mb+')에 맞는 방식이라 마음이 '+S.mbGain+' 덜 지쳤다.</span>':'')
     +(S.tired?'<span class="dn">지친 상태라 효과가 줄었다.</span>':'')+'</div>';
 }
+const OPT_IMG={hum:'img/opt-hum.webp'};
+const PIC_TINT={hum:'#E7D7C3',sci:'#CFE3EE',med:'#DCEFE6',biz:'#F1E2C4',edu:'#F4DCE0',art:'#E2DAF0'};
+function optsHtml(opts,act){
+  const pics=opts.some(o=>o.pic);
+  return'<div class="opts'+(pics?' pics':'')+'">'+opts.map((o,i)=>{
+    const tag=o.tag?'<em class="tag">'+o.tag+'</em>':'';
+    if(pics&&o.pic){
+      const im=OPT_IMG[o.pic],t=o.t.split(' · ');
+      const top=im?'<img class="pimg" src="'+im+'" alt="" loading="lazy">':'<span class="pimg ph-c" style="background:'+(PIC_TINT[o.pic]||'#EEE')+'">'+F[o.pic].n+'</span>';
+      return'<button class="opt pic" data-a="'+act+'" data-v="'+i+'" data-k="opt-'+i+'">'+top+'<span class="pt"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><b>'+t[0]+'</b>'+(t[1]?'<span class="pd2">'+t.slice(1).join(' · ')+'</span>':'')+tag+'</span></span></button>';
+    }
+    return'<button class="opt'+(pics?' wide':'')+'" data-a="'+act+'" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+o.t+'</span>'+tag+'</span></button>';
+  }).join('')+'</div>';
+}
 function vEvent(){
   const steps=evSteps(),st=steps[S.step],last=S.log[S.log.length-1];
   return(S.step===0?vDone():'')+sheetOpen()+shd(cal().n)
     +(S.step>0&&last?'<div class="prevres"><span>'+last.res+'</span>'+chips(last.fx)+'</div>':'')
     +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+(st.small?'<em>작은 사건</em>':'')+'</h3>'
     +(st.text?'<p class="lead">'+st.text+'</p>':'')+(st.html||'')
-    +'<div class="opts">'+st.opts.map((o,i)=>'<button class="opt" data-a="choose" data-v="'+i+'" data-k="opt-'+i+'"><span class="on" aria-hidden="true">'+CIRC[i]+'</span><span><span class="ot">'+o.t+'</span>'+(o.tag?'<em class="tag">'+o.tag+'</em>':'')+'</span></button>').join('')+'</div></section>';
+    +optsHtml(st.opts,'choose')+'</section>';
 }
 function examCard(e){
   if(e.kind==='cert')return'<div class="exam"><h4>'+e.title+'</h4><p class="stamp '+(e.ok?'ok':'no')+'">'+(e.ok?'합격':'불합격')+'</p><p>'+e.msg+'</p></div>';
