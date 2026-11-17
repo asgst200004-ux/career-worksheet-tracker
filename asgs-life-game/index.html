@@ -855,7 +855,7 @@ function baseSteps(){
     {t:'무대 공연에 나간다',fx:{rel:4,mind:4,act:2},res:'조명이 켜지자 머리가 하얘졌다. 박수 소리를 듣고 나서야 숨을 쉬었다.'},
     {t:'잠깐 구경하고 자습실로 간다',fx:{ns:3,rel:-2},res:'자습실은 조용했다. 멀리서 노랫소리가 들렸다.'}]}];
   case '1-7':return[{title:'일할 때 무엇이 가장 중요할까?',text:'진로 선생님이 직업 가치관 카드 여덟 장을 책상에 펼친다. "직업을 고를 때 네가 가장 놓치고 싶지 않은 것 하나만 골라 봐."',
-    opts:VALUES.map(v=>({t:v.k+' · '+v.d,fx:{car:3},run(){S.value=v.k;},res:'「'+v.k+'」 카드를 골랐다. "직업을 고를 때마다 이 기준을 꺼내 보렴. 살면서 바뀌어도 괜찮아."'}))},
+    opts:VALUES.map((v,vi)=>({pic:'v'+vi,t:v.k+' · '+v.d,fx:{car:3},run(){S.value=v.k;},res:'「'+v.k+'」 카드를 골랐다. "직업을 고를 때마다 이 기준을 꺼내 보렴. 살면서 바뀌어도 괜찮아."'}))},
     {title:'어느 분야에 마음이 가니?',html:intBars(),text:'선생님이 1년 동안의 활동 기록을 막대로 보여 준다. 내가 실제로 시간을 쓴 분야 순서다. "지금 정한다고 끝까지 가야 하는 건 아니야."',
     opts:fieldOpts(k=>({t:F[k].n,tag:k===top?'활동 기록 1순위':'',fx:{car:5},run(){S.goal=k;S.int[k]+=1;},res:'「'+F[k].n+'」 분야를 중심으로 2학년을 준비하기로 했다.'}))
     .concat([{t:'아직 모르겠어요. 더 알아볼게요',fx:{car:2,mind:3},res:'"모르는 게 당연해. 2학년 1학기에 세 가지만 직접 해 보자." 선생님과 탐색 계획을 세웠다.'}])}];
@@ -1520,9 +1520,10 @@ function vDone(){
     +(S.mbGain?'<span class="up">내 성향('+S.mb+')에 맞는 방식이라 마음이 '+S.mbGain+' 덜 지쳤다.</span>':'')
     +(S.tired?'<span class="dn">지친 상태라 효과가 줄었다.</span>':'')+'</div>';
 }
-const OPT_IMG={hum:'img/opt-hum.webp',sci:'img/opt-sci.webp',med:'img/opt-med.webp',biz:'img/opt-biz.webp',edu:'img/opt-edu.webp',art:'img/opt-art.webp',college:'img/opt-college.webp',job:'img/opt-job.webp',undecided:'img/opt-undecided.webp',jonghap:'img/opt-jonghap.webp',gyogwa:'img/opt-gyogwa.webp',jeongsi:'img/opt-jeongsi.webp'};
+const OPT_IMG={hum:'img/opt-hum.webp',sci:'img/opt-sci.webp',med:'img/opt-med.webp',biz:'img/opt-biz.webp',edu:'img/opt-edu.webp',art:'img/opt-art.webp',college:'img/opt-college.webp',job:'img/opt-job.webp',undecided:'img/opt-undecided.webp',jonghap:'img/opt-jonghap.webp',gyogwa:'img/opt-gyogwa.webp',jeongsi:'img/opt-jeongsi.webp',v0:'img/opt-v0.webp'};
 const PIC_LABEL={college:'대학 진학',job:'먼저 취업',undecided:'아직 고민 중',jonghap:'학생부종합',gyogwa:'학생부교과',jeongsi:'수능(정시)'};
-const PIC_TINT={college:'#F6DCE3',job:'#DCE6F0',undecided:'#E3EEDC',jonghap:'#EDE0F2',gyogwa:'#F3E8CF',jeongsi:'#D9E4EC',hum:'#E7D7C3',sci:'#CFE3EE',med:'#DCEFE6',biz:'#F1E2C4',edu:'#F4DCE0',art:'#E2DAF0'};
+VALUES.forEach((v,i)=>{PIC_LABEL['v'+i]=v.k;});
+const PIC_TINT={v0:'#FBEFE0',v1:'#FBEFE0',v2:'#FBEFE0',v3:'#FBEFE0',v4:'#FBEFE0',v5:'#FBEFE0',v6:'#FBEFE0',v7:'#FBEFE0',college:'#F6DCE3',job:'#DCE6F0',undecided:'#E3EEDC',jonghap:'#EDE0F2',gyogwa:'#F3E8CF',jeongsi:'#D9E4EC',hum:'#E7D7C3',sci:'#CFE3EE',med:'#DCEFE6',biz:'#F1E2C4',edu:'#F4DCE0',art:'#E2DAF0'};
 function optsHtml(opts,act){
   const pics=opts.some(o=>o.pic);
   return'<div class="opts'+(pics?' pics'+(opts.length===3?' n3':''):'')+'">'+opts.map((o,i)=>{
