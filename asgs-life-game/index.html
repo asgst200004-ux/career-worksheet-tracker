@@ -337,6 +337,16 @@ body::before{background:rgba(26,20,30,.7)}
   .title .who2.l{left:max(-6%,calc(50% - 780px))} .title .who2.r{right:max(-6%,calc(50% - 780px))}
 }
 .wrap.plain{padding-top:24px}
+.fav{display:block;flex:none;width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:var(--av-bg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);max-width:none}
+.fini{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--f-display);font-weight:700;font-size:22px}
+.spk{display:flex;align-items:center;gap:10px;background:var(--hl);border-radius:14px;padding:8px 12px}
+.spk b{display:block;font-family:var(--f-display);font-size:18px}
+.spk small{font-size:12.5px;color:var(--muted)}
+.frend{display:flex;flex-direction:column;gap:12px}
+.frend li{display:flex;gap:12px;align-items:flex-start}
+.frend b{font-family:var(--f-display);font-size:18px}
+.frend small{font-size:12.5px;color:var(--muted)}
+.frend p{font-size:14.5px;margin-top:3px}
 .opts.pics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .opt.pic{display:flex;flex-direction:column;padding:0;overflow:hidden;text-align:left}
 .opt.pic .pimg{display:flex;align-items:center;justify-content:center;width:100%;max-width:none;aspect-ratio:4/3;object-fit:cover}
@@ -667,7 +677,74 @@ const FEV=[
       {t:'운동부 대회 준비로 바쁘다',fx:{hp:3,rel:2},res:'대신 팀 연습에 하루도 빠지지 않았다.'}]}
 ];
 REV.push(...FEV);
+
+const FRIENDS={
+  mj:{n:'민재',role:'단짝 친구',c:'#C9A27E',img:{smile:'img/minjae-smile.webp'}},
+  sy:{n:'서연',role:'선의의 경쟁자',c:'#7E8FC9',img:{}},
+  jw:{n:'지우',role:'진로를 먼저 정한 친구',c:'#C97E9A',img:{}}
+};
+const FKEYS2=['mj','sy','jw'];
+function bond(k,n){S.bond=S.bond||{mj:0,sy:0,jw:0};S.bond[k]=(S.bond[k]||0)+n;}
+const bondOf=k=>(S.bond&&S.bond[k])||0;
+function frFace(k,ex,cls){const f=FRIENDS[k],src=f.img[ex]||f.img.smile;
+  return src?'<img class="'+(cls||'fav')+'" src="'+src+'" alt="" decoding="async">':'<span class="'+(cls||'fav')+' fini" style="background:'+f.c+'">'+f.n[0]+'</span>';}
+const NOT=()=>false;
+const FRV=[
+  /* 1학년 */
+  {id:'fr-mj1',fr:'mj',at:[1,1],w:NOT,t:'옆자리 민재',x:()=>'첫 시험을 앞두고 옆자리 민재가 말을 건다. "야, 너 수학 범위 어디까지인지 알아? 나 하나도 모르겠어."',
+    o:()=>[{t:'같이 공부하자고 한다',fx:{rel:3,ns:1},run(){bond('mj',2);},res:'민재는 문제를 풀다 말고 농담을 했다. 그래도 둘 다 범위를 끝까지 봤다. 그날부터 같이 하교한다.'},
+      {t:'범위만 알려 주고 내 공부를 한다',fx:{ns:2},run(){bond('mj',1);},res:'"고마워!" 민재가 매점 우유를 하나 사 왔다.'},
+      {t:'나도 모른다며 같이 웃는다',fx:{rel:2,mind:2},run(){bond('mj',1);},res:'둘이 같이 담임 선생님께 물으러 갔다.'}]},
+  {id:'fr-sy1',fr:'sy',at:[1,3],w:NOT,t:'전교권 서연',x:()=>'중간고사 성적표가 나온 날, 같은 반 서연이 모든 과목 1등급이라는 소문이 돌았다. 서연이 내 성적표를 힐끗 본다.',
+    o:()=>[{t:'"어떻게 공부해?" 하고 솔직하게 묻는다',fx:{ns:2,rel:1},run(){bond('sy',2);},res:'서연은 잠깐 놀라더니 오답 노트를 보여 주었다. "틀린 건 세 번 다시 풀어."'},
+      {t:'다음 시험에서는 이기겠다고 마음먹는다',fx:{ns:3,mind:-2},run(){bond('sy',1);S.flags.syRival=1;},res:'그날 밤 책상 앞에 「기말고사 목표: 서연」이라고 붙였다.'},
+      {t:'신경 쓰지 않는다',fx:{mind:1},res:'성적은 남과 비교하는 게 아니라고 생각했다.'}]},
+  {id:'fr-jw1',fr:'jw',at:[1,5],w:NOT,t:'꿈이 확실한 지우',x:()=>'진로 시간, 지우가 발표한다. "저는 간호사가 될 거예요. 중학교 때 할머니 병간호를 하면서 정했어요." 반 아이들이 박수를 친다.',
+    o:()=>[{t:'쉬는 시간에 지우에게 어떻게 정했는지 묻는다',fx:{car:3,rel:2},run(){bond('jw',2);},res:'"정한 건 아니고, 그냥 그 일이 계속 생각나더라." 지우의 말이 오래 남았다.'},
+      {t:'부럽기도 하고 조급해진다',fx:{car:1,mind:-2},run(){bond('jw',1);},res:'나는 아직 아무것도 모르는 것 같았다. 집에 와서 진로 검사 결과지를 다시 꺼냈다.'},
+      {t:'나는 나대로 찾으면 된다고 생각한다',fx:{mind:2},res:'박수를 치고 내 공책에 「궁금한 것 3가지」를 적었다.'}]},
+  /* 2학년 */
+  {id:'fr-mj2',fr:'mj',at:[2,1],w:NOT,t:'민재의 고민',x:()=>'점심시간, 민재가 운동장 스탠드에 앉아 있다. "나 축구부 그만둘까 봐. 부상 때문에 선수는 힘들대. 그럼 난 뭘 하지?"',
+    o:()=>[{t:'운동과 관련된 다른 직업을 같이 찾아본다',fx:{car:3,rel:3},run(){bond('mj',2);S.flags.mjHelp=1;},res:'물리치료사, 스포츠 트레이너, 체육 교사. 민재가 처음으로 휴대폰 메모장에 무언가를 적었다.'},
+      {t:'끝까지 이야기를 들어 준다',fx:{rel:4,mind:-1},run(){bond('mj',2);},res:'민재는 한참 말하다가 "들어 줘서 고맙다"며 웃었다.'},
+      {t:'"괜찮아, 아직 시간 많아"라고 말한다',fx:{rel:1},run(){bond('mj',1);},res:'민재는 고개를 끄덕였지만 표정이 그대로였다.'}]},
+  {id:'fr-sy2',fr:'sy',at:[2,3],w:NOT,t:'서연이 흔들린다',x:()=>'기말고사 직전, 늘 침착하던 서연이 복도 끝에서 울고 있다. "부모님은 의대 가래. 근데 난 경제가 좋아."',
+    o:()=>[{t:'옆에 앉아 서연의 이야기를 듣는다',fx:{rel:4,mind:-1},run(){bond('sy',3);},res:'서연은 처음으로 공부 이야기가 아닌 이야기를 했다. 우리는 경쟁자이기 전에 친구였다.'},
+      {t:'진로 선생님과 상담해 보라고 권한다',fx:{rel:2,car:1},run(){bond('sy',2);S.flags.syCounsel=1;},res:'다음 주, 서연이 상담실에서 나오며 손을 흔들었다.'},
+      {t:'모른 척 지나간다',fx:{ns:1},run(){bond('sy',-1);},res:'시험이 끝나고도 그 장면이 자꾸 떠올랐다.'}]},
+  {id:'fr-jw2',fr:'jw',at:[2,6],w:NOT,t:'지우의 첫 실패',x:()=>'지우가 병원 봉사를 다녀온 뒤 말했다. "피 보는 게 생각보다 너무 힘들어. 간호사는 내 길이 아닌가 봐."',
+    o:()=>[{t:'간호 말고도 사람을 돕는 다른 일을 함께 찾아본다',fx:{car:3,rel:2},run(){bond('jw',2);S.flags.jwHelp=1;const j=unlockJob('med','ev');return j?{res:'둘이 보건·의료 직업을 하나씩 찾아보았다. '+qj(j.n,'이라는','라는')+' 직업에 지우의 눈이 반짝였다.'}:null;},res:'둘이 보건·의료 직업을 하나씩 찾아보았다. 지우의 눈이 다시 반짝였다.'},
+      {t:'"해 보고 안 맞는 걸 안 것도 큰 거야"라고 말한다',fx:{rel:3,mind:1},run(){bond('jw',2);},res:'"그런가?" 지우가 처음으로 웃었다. 해 본 사람만 할 수 있는 고민이었다.'},
+      {t:'나도 아직 모르겠다며 같이 한숨 쉰다',fx:{mind:-1,rel:1},run(){bond('jw',1);},res:'둘이 나란히 매점 빵을 먹었다. 답은 안 나왔지만 덜 외로웠다.'}]},
+  /* 3학년 */
+  {id:'fr-mj3',fr:'mj',at:[3,2],w:NOT,t:'민재의 부탁',x:()=>'민재가 쑥스러운 듯 말한다. "나 진짜 물리치료학과 가 보려고. 근데 생명과학이 너무 어려워. 좀 도와줄 수 있어?"',
+    o:()=>[{t:'일주일에 두 번 같이 공부한다',fx:{ns:2,rel:3,hp:-2},run(){bond('mj',2);},res:'가르치다 보니 내 개념도 단단해졌다. 민재의 모의고사 점수가 처음으로 올랐다.'},
+      {t:'내가 쓰던 정리 노트를 빌려준다',fx:{rel:2},run(){bond('mj',1);},res:'노트를 돌려받을 때 맨 뒷장에 「고맙다 친구야」가 적혀 있었다.'},
+      {t:'나도 바빠서 어렵다고 말한다',fx:{ns:1},res:'"그래, 고3이니까." 민재는 웃었지만 조금 서운해 보였다.'}]},
+  {id:'fr-sy3',fr:'sy',at:[3,4],w:NOT,t:'서연의 선택',x:()=>'여름방학, 서연에게서 문자가 왔다. "나 결정했어. 경제학과 쓸 거야. 부모님이랑 세 번 이야기했어."',
+    o:()=>[{t:'"멋있다, 응원할게"라고 답한다',fx:{rel:3,mind:2},run(){bond('sy',2);},res:'"너 덕분이야." 서연이 웃는 이모티콘을 보냈다.'},
+      {t:'나도 내 원서 이야기를 털어놓는다',fx:{rel:2,car:2},run(){bond('sy',2);},res:'밤늦게까지 서로의 지원 학과 이야기를 했다. 경쟁자가 가장 든든한 상담 상대가 됐다.'},
+      {t:'짧게 답하고 다시 공부한다',fx:{sn:1},run(){bond('sy',1);},res:'"ㅇㅇ 화이팅." 휴대폰을 엎어 두었다.'}]},
+  {id:'fr-jw3',fr:'jw',at:[3,5],w:NOT,t:'지우의 새 목표',x:()=>'지우가 활짝 웃으며 달려온다. "나 응급구조학과로 정했어! 병원 안이 아니라 현장에서 사람을 돕는 거야."',
+    o:()=>[{t:'함께 기뻐하며 면접 연습 상대가 되어 준다',fx:{rel:3,car:2},run(){bond('jw',2);S.flags.iv=1;},res:'서로 면접관이 되어 질문을 주고받았다. 지우 덕분에 나도 내 답을 다듬었다.'},
+      {t:'"돌고 돌아 찾았네"라며 웃어 준다',fx:{rel:2,mind:2},run(){bond('jw',1);},res:'"응, 근데 돌아온 길도 다 쓸모 있었어." 지우가 말했다.'},
+      {t:'부러운 마음에 말이 잘 안 나온다',fx:{mind:-2},res:'집에 와서 생각했다. 지우도 2년 동안 흔들렸었다.'}]}
+];
+REV.push(...FRV);
+function friendEnd(k){
+  const b=bondOf(k),close=b>=5,mid=b>=2;
+  const E={
+    mj:{fate:S.flags.mjHelp||bondOf('mj')>=4?'물리치료학과에 합격했다. 다친 선수를 돕는 사람이 되겠다고 했다.':'체육교육과에 합격했다. 운동장을 떠나지 않는 길을 찾았다.',
+      a:'졸업식이 끝나자마자 민재가 달려와 어깨동무를 하고 사진을 찍었다. "우리 10년 뒤에도 이러자."',b:'졸업식에서 민재와 꽃다발을 바꿔 들고 사진을 한 장 찍었다.',c:'멀리서 민재와 눈이 마주쳐 손을 흔들었다.'},
+    sy:{fate:'경제학과에 합격했다. 부모님도 결국 웃으며 졸업식에 오셨다.',
+      a:'서연이 다가와 말했다. "3년 동안 네가 있어서 끝까지 갈 수 있었어." 처음 보는 표정이었다.',b:'서연과 악수를 했다. "대학 가서도 지지 마."',c:'서연은 단상에서 우수상을 받았다. 박수를 쳤다.'},
+    jw:{fate:'응급구조학과에 합격했다. 간호사의 꿈은 바뀌었지만 사람을 돕는다는 마음은 그대로였다.',
+      a:'지우가 내 손을 잡고 말했다. "너도 네 길 찾을 거야. 내가 그랬잖아."',b:'지우와 서로의 졸업장을 들고 사진을 찍었다.',c:'지우는 친구들에게 둘러싸여 있었다. 멀리서 축하를 보냈다.'}
+  }[k];
+  return{fate:E.fate,line:close?E.a:mid?E.b:E.c,b};
+}
 function pickRev(){
+  {const c=ctx(),fe=FRV.find(r=>r.at[0]===c.y&&r.at[1]===c.s&&!S.usedEv.includes(r.id));if(fe){S.rev=fe.id;S.usedEv.push(fe.id);return;}}
   if(Math.random()>.6)return;
   const c=ctx(),pool=REV.filter(r=>!S.usedEv.includes(r.id)&&r.w(c));
   if(!pool.length)return;
@@ -880,7 +957,7 @@ function intro(){
 }
 function evSteps(){
   const b=baseSteps();
-  if(S.rev){const r=REV.find(x=>x.id===S.rev);if(r)b.push({title:r.t,text:r.x(),opts:r.o(),small:1});}
+  if(S.rev){const r=REV.find(x=>x.id===S.rev);if(r)b.push({title:r.t,text:r.x(),opts:r.o(),small:1,fr:r.fr});}
   return b;
 }
 function baseSteps(){
@@ -1119,6 +1196,7 @@ function summaryText(){
     '희망 분야: '+F[g].n+(S.major?' ('+S.major+')':S.job?' ('+S.job.n+')':''),
     '선택과목: 2학년 '+F[S.elect[2]||g].y2.join(', ')+' / 3학년 '+(S.y3subs||F[g].y3).join(', '),
     '학생부 기록: '+S.recs.length+'건, 독서 '+(S.cnt.read||0)+'권, 봉사 '+((S.cnt.vol||0)*4)+'시간',
+    '친구: '+FKEYS2.map(k=>FRIENDS[k].n+' 우정 '+bondOf(k)).join(', '),
     '직업 카드: '+S.jobs.length+'/'+JOBN+'장'+(S.jobs.length?' ('+S.jobs.join(', ')+')':'')];
   return L.join('\n');
 }
@@ -1600,7 +1678,8 @@ function vEvent(){
   const steps=evSteps(),st=steps[S.step],last=S.log[S.log.length-1];
   return(S.step===0?vDone():'')+sheetOpen()+shd(cal().n)
     +(S.step>0&&last?'<div class="prevres"><span>'+last.res+'</span>'+chips(last.fx)+'</div>':'')
-    +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+(st.small?'<em>작은 사건</em>':'')+'</h3>'
+    +'<h3 class="q"><span class="qn">문제 2'+(steps.length>1?'-'+(S.step+1):'')+'.</span>'+st.title+(st.small?'<em>'+(st.fr?'친구 이야기':'작은 사건')+'</em>':'')+'</h3>'
+    +(st.fr?'<div class="spk">'+frFace(st.fr)+'<span><b>'+FRIENDS[st.fr].n+'</b><small>'+FRIENDS[st.fr].role+'</small></span></div>':'')
     +(st.text?'<p class="lead">'+st.text+'</p>':'')+(st.html||'')
     +optsHtml(st.opts,'choose')+'</section>';
 }
@@ -1687,6 +1766,7 @@ function vEnding(){
     +'<p class="muted">학교 시험, 5등급제</p><div class="flow">'+flowS+'</div>'
     +(flowM?'<p class="muted">모의고사와 수능, 9등급제</p><div class="flow">'+flowM+'</div>':'')+'</section>'
     +'<section class="sheet">'+jobsBook().replace('<h3 class="h3">','<h2 class="h3">').replace('</h3>','</h2>')+(S.jobs.length?'<ul class="jlist">'+S.jobs.map(n=>{const j=jobInfo(n);return'<li><b>'+n+'</b> '+j.d+' <small>'+j.s+'</small></li>';}).join('')+'</ul>':'')+'</section>'
+    +'<section class="sheet"><h2 class="h3">친구들의 졸업</h2><ul class="frend">'+FKEYS2.map(k=>{const e=friendEnd(k),f=FRIENDS[k];return'<li>'+frFace(k,'smile')+'<div><b>'+f.n+'</b> <small>'+f.role+' · 우정 '+'♥'.repeat(Math.max(0,Math.min(5,Math.ceil(e.b/1.5))))+'</small><p>'+e.line+'</p><p class="muted">'+e.fate+'</p></div></li>';}).join('')+'</ul></section>'
     +'<section class="sheet"><h2 class="h3">학생부에 남은 기록</h2><ul class="recnew" style="border:0;padding:0">'+recs+'</ul>'
     +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 진로 탐색 '+((S.cnt.career||0)+(S.cnt.camp||0))+'번</p></section>'
     +'<section class="sheet"><h2 class="h3">돌아보기</h2><ol class="reflect">'
