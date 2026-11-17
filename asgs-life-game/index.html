@@ -146,7 +146,10 @@ i{font-style:normal}
 .kv .who.l{left:5%} .kv .who.r{right:5%}
 .hero .bb{position:relative}
 .idp{display:block;width:100%;max-width:132px;aspect-ratio:1/1.12;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:linear-gradient(var(--id1),var(--id2))}
-.idp svg{display:block;width:100%;height:auto;margin-top:6%}
+.idp svg,.idp .ph{display:block;width:100%;height:auto;margin-top:6%}
+.ph{display:block;max-width:none}
+.phf{display:block;overflow:hidden;border-radius:50%}
+.phf img{display:block;width:100%;max-width:none;transform:scale(2.3);transform-origin:50% 33%}
 
 /* 상태판 */
 .hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--board);color:var(--chalk);border-bottom:6px solid var(--wood)}
@@ -824,8 +827,12 @@ function prng(seed){let a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;let t
 let artUid=0;
 
 /* --- character bust --- viewBox 240x300 */
+const PHOTO={f:{smile:'img/harin-smile.webp',happy:'img/harin-happy.webp',tired:'img/harin-tired.webp',worry:'img/harin-worry.webp'}};
 function chara(c,o){
-  o=o||{};const ex=o.ex||'smile',u='c'+(artUid++),girl=c==='f';
+  o=o||{};
+  if(PHOTO[c]){const src=PHOTO[c][o.ex||'smile']||PHOTO[c].smile;
+    if(o.face)return'<span class="phf"'+(o.w?' style="width:'+o.w+'px;height:'+(o.h||o.w)+'px"':'')+'><img src="'+src+'" alt="" decoding="async"></span>';
+    return'<img class="ph'+(o.cls?' '+o.cls:'')+'" src="'+src+'" alt="" decoding="async" draggable="false">';}const ex=o.ex||'smile',u='c'+(artUid++),girl=c==='f';
   const H=girl?{d:'#3F2B24',m:'#5C4034',l:'#946D58'}:{d:'#1F1B1B',m:'#34302F',l:'#625853'};
   const SK='#FCE4D2',SKS='#F2C3A8',LINE='#33241F',iris=girl?['#4A2A1C','#C98A4B']:['#23222E','#7C7AA0'];
   const FACE='M62 106 C62 60 178 60 178 106 C178 142 152 170 120 174 C88 170 62 142 62 106Z';

@@ -22,3 +22,7 @@
 
 `index.html` 한 파일이 원본입니다. 게시 페이지를 갱신할 때는 이 파일에서
 `<!doctype>`, `<html>`, `<head>`, `<body>` 태그와 charset·viewport 메타를 뺀 내용을 올립니다.
+
+## 그림 파일
+
+`img/` 폴더에 하린 그림 4장(`harin-smile`, `harin-happy`, `harin-tired`, `harin-worry`)이 있습니다. `index.html`과 `img` 폴더를 같은 곳에 두어야 그림이 나옵니다. 도윤 그림은 아직 코드로 그린 그림을 씁니다.
