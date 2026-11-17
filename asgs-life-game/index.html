@@ -679,7 +679,7 @@ const FEV=[
 REV.push(...FEV);
 
 const FRIENDS={
-  mj:{n:'민재',role:'단짝 친구',c:'#C9A27E',img:{smile:'img/minjae-smile.webp'}},
+  mj:{n:'민재',role:'단짝 친구',c:'#C9A27E',img:{smile:'img/minjae-smile.webp',happy:'img/minjae-happy.webp'}},
   sy:{n:'서연',role:'선의의 경쟁자',c:'#7E8FC9',img:{}},
   jw:{n:'지우',role:'진로를 먼저 정한 친구',c:'#C97E9A',img:{}}
 };
@@ -1766,7 +1766,7 @@ function vEnding(){
     +'<p class="muted">학교 시험, 5등급제</p><div class="flow">'+flowS+'</div>'
     +(flowM?'<p class="muted">모의고사와 수능, 9등급제</p><div class="flow">'+flowM+'</div>':'')+'</section>'
     +'<section class="sheet">'+jobsBook().replace('<h3 class="h3">','<h2 class="h3">').replace('</h3>','</h2>')+(S.jobs.length?'<ul class="jlist">'+S.jobs.map(n=>{const j=jobInfo(n);return'<li><b>'+n+'</b> '+j.d+' <small>'+j.s+'</small></li>';}).join('')+'</ul>':'')+'</section>'
-    +'<section class="sheet"><h2 class="h3">친구들의 졸업</h2><ul class="frend">'+FKEYS2.map(k=>{const e=friendEnd(k),f=FRIENDS[k];return'<li>'+frFace(k,'smile')+'<div><b>'+f.n+'</b> <small>'+f.role+' · 우정 '+'♥'.repeat(Math.max(0,Math.min(5,Math.ceil(e.b/1.5))))+'</small><p>'+e.line+'</p><p class="muted">'+e.fate+'</p></div></li>';}).join('')+'</ul></section>'
+    +'<section class="sheet"><h2 class="h3">친구들의 졸업</h2><ul class="frend">'+FKEYS2.map(k=>{const e=friendEnd(k),f=FRIENDS[k];return'<li>'+frFace(k,e.b>=5?'happy':'smile')+'<div><b>'+f.n+'</b> <small>'+f.role+' · 우정 '+'♥'.repeat(Math.max(0,Math.min(5,Math.ceil(e.b/1.5))))+'</small><p>'+e.line+'</p><p class="muted">'+e.fate+'</p></div></li>';}).join('')+'</ul></section>'
     +'<section class="sheet"><h2 class="h3">학생부에 남은 기록</h2><ul class="recnew" style="border:0;padding:0">'+recs+'</ul>'
     +'<p class="muted">동아리 활동 '+(S.cnt.club||0)+'번, 봉사 '+((S.cnt.vol||0)*4)+'시간, 독서 '+(S.cnt.read||0)+'권, 진로 탐색 '+((S.cnt.career||0)+(S.cnt.camp||0))+'번</p></section>'
     +'<section class="sheet"><h2 class="h3">돌아보기</h2><ol class="reflect">'
