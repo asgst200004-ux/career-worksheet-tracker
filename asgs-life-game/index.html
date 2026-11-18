@@ -266,6 +266,9 @@ body::before{background:rgba(26,20,30,.7)}
 .bgfix .stage img{display:block;width:100%;height:100%;max-width:none;animation:bgin .5s ease}
 @keyframes bgin{from{opacity:.4}to{opacity:1}}
 .bgfix .hall-t{left:9.3%;width:49%;top:14.6%;height:15.4%}
+.hall-t .bt-n{display:none}
+@media (max-aspect-ratio:4/5){.hall-t .bt-w{display:none}.hall-t .bt-n{display:inline}}
+.bgfix .stage.hall{left:clamp(calc(100vw - max(100vw,177.78vh)),calc(50vw - 0.337 * max(100vw,177.78vh)),0px);transform:translateY(-50%)}
 .dim{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(20,14,22,.08) 0%,rgba(20,14,22,.28) 55%,rgba(20,14,22,.55) 100%)}
 #app{position:relative;z-index:2}
 .actor{position:fixed;z-index:1;pointer-events:none;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 96px);height:min(44vh,390px)}
@@ -1599,13 +1602,15 @@ const SCENE_IMG={'gate:spring':'img/bg-gate-spring.webp','class:spring':'img/bg-
   'class:autumn':'img/bg-class-autumn.webp','class:winter':'img/bg-class-winter.webp'};
 function ribbon(t){return'<div class="ribbon">'+bannerSvg(t,'rib-svg','#8E1F1F')+'</div>';}
 function bannerSvg(t,cls,col){
-  const W=566,H=100,n=[...t].length,fs=Math.min(74,(W*0.88)/(n*0.92)),tl=Math.min(W*0.9,fs*n*1.18);
-  return'<svg class="'+(cls||'hall-t')+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><text x="'+W/2+'" y="'+(H/2+fs*0.36)+'" text-anchor="middle" font-family="\'Black Han Sans\',\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif" font-size="'+fs.toFixed(1)+'" textLength="'+tl.toFixed(0)+'" lengthAdjust="spacing" fill="'+(col||'#2E1A1A')+'">'+esc(t)+'</text></svg>';
+  const W=566,H=100,n=[...t].length,font="'Black Han Sans','Apple SD Gothic Neo','Malgun Gothic',sans-serif";
+  const txt=(c,span)=>{const fs=Math.min(74,(W*span)/(n*0.92)),tl=Math.min(W*span,fs*n*1.18);
+    return'<text class="'+c+'" x="'+W/2+'" y="'+(H/2+fs*0.36)+'" text-anchor="middle" font-family="'+font+'" font-size="'+fs.toFixed(1)+'" textLength="'+tl.toFixed(0)+'" lengthAdjust="spacing" fill="'+(col||'#2E1A1A')+'">'+esc(t)+'</text>';};
+  return'<svg class="'+(cls||'hall-t')+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true">'+txt('bt-w',0.88)+txt('bt-n',0.46)+'</svg>';
 }
 function sceneSvg(k){
   if(sceneCache[k])return sceneCache[k];
   const pp=k.split(':'),im=SCENE_IMG[pp.slice(0,2).join(':')]||SCENE_IMG[pp[0]];
-  if(im)return sceneCache[k]='<img class="scene" src="'+im+'" alt="" decoding="async" draggable="false">';
+  if(im)return sceneCache[k]='<img class="scene" src="'+im+'" alt="" decoding="async" draggable="false">'+(pp[0]==='hall'?bannerSvg(pp[1]):'');
   const p=k.split(':');let h;
   switch(p[0]){
     case'gate':h=sceneGate(p[1]);break;case'class':h=sceneClass(p[1],p[2]==='1');break;case'field':h=sceneField();break;
@@ -1638,7 +1643,7 @@ function mood(){
   return s.mind>=75?'happy':'smile';
 }
 function banner(key,ex,solo){return'<div class="scn'+(solo?' solo':'')+'">'+sceneSvg(key||sceneKey())+chara(S.ch,{ex:ex||mood(),cls:'who'})+'</div>';}
-const sheetOpen=()=>{const k=S&&UI.screen==='game'?sceneKey():'';return'<section class="sheet">'+(k.indexOf('hall:')===0?ribbon(k.slice(5)):'');};
+const sheetOpen=()=>'<section class="sheet">';
 function chips(fx){
   const ks=Object.keys(fx||{}).filter(k=>fx[k]);if(!ks.length)return'';
   return'<span class="dl">'+ks.map(k=>'<i class="d '+(fx[k]>0?'up':'dn')+'">'+STN[k]+' '+(fx[k]>0?'+':'−')+Math.abs(fx[k])+'</i>').join('')+'</span>';
@@ -1826,7 +1831,7 @@ function vEnding(){
   const flowS=S.exams.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('');
   const flowM=S.mocks.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('')+(S.csat?'<i>수능<b>'+g1(S.csat.avg)+'</b></i>':'');
   const recs=S.recs.length?S.recs.map(r=>'<li>'+r.y+'학년 '+r.cat+': '+r.text+'</li>').join(''):'<li>남은 기록이 없다.</li>';
-  return'<main class="wrap game">'+ribbon('ASGS 졸업식')+'<section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
+  return'<main class="wrap game"><section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
     +'<p>위 학생은 ASGS에서 3년의 과정을 모두 마쳤으므로 이 졸업장을 수여합니다.</p><span class="seal">ASGS</span></section>'
     +'<section class="sheet"><h2 class="h3">졸업 후의 길</h2><p class="big">'+o.h+'</p><p class="big-s">'+o.s+'</p>'
     +'<p class="muted">희망 분야: '+F[g].n+(S.flags.changed?' (2학년 때 방향을 바꿨다)':'')+'</p></section>'
@@ -1896,7 +1901,7 @@ function render(top){
   else h=vHud()+'<main class="wrap game">'+vGame()+'</main>';
   if(UI.modal&&S&&UI.screen==='game')h+=vModal();
   app.innerHTML=h;
-  const L=layers();setLayer('bg',L.bg?'<div class="stage">'+sceneSvg(L.bg)+'</div>':'');setLayer('actor',L.actor||'');
+  const L=layers();setLayer('bg',L.bg?'<div class="stage'+(L.bg.indexOf('hall:')===0?' hall':'')+'">'+sceneSvg(L.bg)+'</div>':'');setLayer('actor',L.actor||'');
   prev=S?Object.assign({},S.stats):null;
   if(top)window.scrollTo(0,0);
   else if(fk){const el=app.querySelector('[data-k="'+fk+'"]');if(el&&!el.disabled)el.focus({preventScroll:true});}
