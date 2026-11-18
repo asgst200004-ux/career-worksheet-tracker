@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>ASGS 고교 3년</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap">
 <style>
 /* 구성: 위에는 칠판(상태판), 아래에는 시험지 한 장. 선택지는 객관식 보기 ①②③, 결과는 빨간펜으로 표시한다. */
 :root{
@@ -124,7 +124,7 @@ i{font-style:normal}
 .scene{display:block}
 .scn{position:relative;margin:-18px -16px 0;aspect-ratio:20/9;overflow:hidden;border-radius:2px 2px 0 0;background:var(--grid)}
 .scn.solo{margin:0;border:1px solid var(--line);border-radius:3px}
-.hall-t{position:absolute;left:9.3%;width:49%;top:5.5%;height:19%;display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-weight:700;font-size:clamp(18px,6.4vw,34px);color:#3A2320;white-space:nowrap}
+.hall-t{position:absolute;left:9.3%;width:49%;top:5.5%;height:19%;overflow:visible}
 .scn .scene,.kvis .scene{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:cover}
 .who{position:absolute;aspect-ratio:240/300;width:auto;filter:drop-shadow(1.5px 0 0 var(--sticker)) drop-shadow(-1.5px 0 0 var(--sticker)) drop-shadow(0 -1.5px 0 var(--sticker)) drop-shadow(0 4px 6px var(--shade))}
 .scn .who{right:4%;bottom:-10%;height:106%}
@@ -265,7 +265,7 @@ body::before{background:rgba(26,20,30,.7)}
 .bgfix .stage{position:absolute;left:50%;top:50%;width:max(100vw,177.78vh);height:max(56.25vw,100vh);transform:translate(-50%,-50%)}
 .bgfix .stage img{display:block;width:100%;height:100%;max-width:none;animation:bgin .5s ease}
 @keyframes bgin{from{opacity:.4}to{opacity:1}}
-.bgfix .hall-t{left:9.3%;width:49%;top:14.6%;height:15.4%;font-size:max(2.6vw,4.6vh)}
+.bgfix .hall-t{left:9.3%;width:49%;top:14.6%;height:15.4%}
 .dim{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,rgba(20,14,22,.08) 0%,rgba(20,14,22,.28) 55%,rgba(20,14,22,.55) 100%)}
 #app{position:relative;z-index:2}
 .actor{position:fixed;z-index:1;pointer-events:none;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 96px);height:min(44vh,390px)}
@@ -337,6 +337,10 @@ body::before{background:rgba(26,20,30,.7)}
   .title .who2.l{left:max(-6%,calc(50% - 780px))} .title .who2.r{right:max(-6%,calc(50% - 780px))}
 }
 .wrap.plain{padding-top:24px}
+.ribbon{position:relative;aspect-ratio:566/100;width:100%;background:linear-gradient(#FFFEF8,#F6F0E2);border-top:4px solid #B98A2E;border-bottom:4px solid #B98A2E;border-radius:3px;box-shadow:0 4px 10px rgba(60,30,10,.18)}
+.ribbon::before,.ribbon::after{content:"";position:absolute;top:-10px;width:2px;height:12px;background:#8A6A3A}
+.ribbon::before{left:10%}.ribbon::after{right:10%}
+.rib-svg{position:absolute;inset:6% 4%;width:92%;height:88%;overflow:visible}
 .fav{display:block;flex:none;width:52px;height:52px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:var(--av-bg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.15);max-width:none}
 .fini{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--f-display);font-weight:700;font-size:22px}
 .spk{display:flex;align-items:center;gap:10px;background:var(--hl);border-radius:14px;padding:8px 12px}
@@ -1593,10 +1597,15 @@ function sceneWork(seed){
 const sceneCache={};
 const SCENE_IMG={'gate:spring':'img/bg-gate-spring.webp','class:spring':'img/bg-class-spring.webp','class:summer':'img/bg-class-summer.webp','hall':'img/bg-hall.webp','work':'img/bg-work.webp','night':'img/bg-night.webp','counsel':'img/bg-counsel.webp','field':'img/bg-field.webp','festival':'img/bg-festival.webp','gate:summer':'img/bg-gate-summer.webp','gate:autumn':'img/bg-gate-autumn.webp','gate:winter':'img/bg-gate-winter.webp',
   'class:autumn':'img/bg-class-autumn.webp','class:winter':'img/bg-class-winter.webp'};
+function ribbon(t){return'<div class="ribbon">'+bannerSvg(t,'rib-svg','#8E1F1F')+'</div>';}
+function bannerSvg(t,cls,col){
+  const W=566,H=100,n=[...t].length,fs=Math.min(74,(W*0.88)/(n*0.92)),tl=Math.min(W*0.9,fs*n*1.18);
+  return'<svg class="'+(cls||'hall-t')+'" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><text x="'+W/2+'" y="'+(H/2+fs*0.36)+'" text-anchor="middle" font-family="\'Black Han Sans\',\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif" font-size="'+fs.toFixed(1)+'" textLength="'+tl.toFixed(0)+'" lengthAdjust="spacing" fill="'+(col||'#2E1A1A')+'">'+esc(t)+'</text></svg>';
+}
 function sceneSvg(k){
   if(sceneCache[k])return sceneCache[k];
   const pp=k.split(':'),im=SCENE_IMG[pp.slice(0,2).join(':')]||SCENE_IMG[pp[0]];
-  if(im)return sceneCache[k]='<img class="scene" src="'+im+'" alt="" decoding="async" draggable="false">'+(pp[0]==='hall'?'<span class="hall-t">'+pp[1]+'</span>':'');
+  if(im)return sceneCache[k]='<img class="scene" src="'+im+'" alt="" decoding="async" draggable="false">';
   const p=k.split(':');let h;
   switch(p[0]){
     case'gate':h=sceneGate(p[1]);break;case'class':h=sceneClass(p[1],p[2]==='1');break;case'field':h=sceneField();break;
@@ -1608,11 +1617,11 @@ function sceneSvg(k){
 function sceneKey(){
   const y=year(),s=slot();
   if(S.phase==='yearend')return'hall:'+y+'학년 종업식';
-  if(S.phase==='final'){const p=S.fin.pages[S.fp];return p==='grad'?'hall:졸업식':(p==='jobres'||p==='contract')?'work':p==='fallback'?'counsel':'gate:winter';}
-  if(y===3&&S.path==='job')return['work','work','work','work','gate:summer','counsel','counsel','hall:졸업식'][s];
-  return{1:['gate:spring','field','class:summer:1','class:summer:1','gate:summer','class:autumn:1','festival','counsel'],
+  if(S.phase==='final'){const p=S.fin.pages[S.fp];return p==='grad'?'hall:ASGS 졸업식':(p==='jobres'||p==='contract')?'work':p==='fallback'?'counsel':'gate:winter';}
+  if(y===3&&S.path==='job')return['work','work','work','work','gate:summer','counsel','counsel','hall:ASGS 졸업식'][s];
+  return{1:['hall:ASGS 입학식','field','class:summer:1','class:summer:1','gate:summer','class:autumn:1','festival','counsel'],
     2:['gate:spring','class:spring:1','class:summer:0','class:summer:1','gate:summer','counsel','class:winter:1','night:1'],
-    3:['gate:spring','class:spring:1','class:summer:1','class:summer:1','night:0','gate:autumn','night:1','hall:졸업식']}[y][s];
+    3:['gate:spring','class:spring:1','class:summer:1','class:summer:1','night:0','gate:autumn','night:1','hall:ASGS 졸업식']}[y][s];
 }
 function mood(){
   const s=S.stats;
@@ -1629,7 +1638,7 @@ function mood(){
   return s.mind>=75?'happy':'smile';
 }
 function banner(key,ex,solo){return'<div class="scn'+(solo?' solo':'')+'">'+sceneSvg(key||sceneKey())+chara(S.ch,{ex:ex||mood(),cls:'who'})+'</div>';}
-const sheetOpen=()=>'<section class="sheet">';
+const sheetOpen=()=>{const k=S&&UI.screen==='game'?sceneKey():'';return'<section class="sheet">'+(k.indexOf('hall:')===0?ribbon(k.slice(5)):'');};
 function chips(fx){
   const ks=Object.keys(fx||{}).filter(k=>fx[k]);if(!ks.length)return'';
   return'<span class="dl">'+ks.map(k=>'<i class="d '+(fx[k]>0?'up':'dn')+'">'+STN[k]+' '+(fx[k]>0?'+':'−')+Math.abs(fx[k])+'</i>').join('')+'</span>';
@@ -1817,7 +1826,7 @@ function vEnding(){
   const flowS=S.exams.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('');
   const flowM=S.mocks.map(e=>'<i>'+lab(e)+'<b>'+g1(e.avg)+'</b></i>').join('')+(S.csat?'<i>수능<b>'+g1(S.csat.avg)+'</b></i>':'');
   const recs=S.recs.length?S.recs.map(r=>'<li>'+r.y+'학년 '+r.cat+': '+r.text+'</li>').join(''):'<li>남은 기록이 없다.</li>';
-  return'<main class="wrap game"><section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
+  return'<main class="wrap game">'+ribbon('ASGS 졸업식')+'<section class="diploma"><h1>졸업장</h1><p class="dn-name">'+esc(S.name)+'</p>'
     +'<p>위 학생은 ASGS에서 3년의 과정을 모두 마쳤으므로 이 졸업장을 수여합니다.</p><span class="seal">ASGS</span></section>'
     +'<section class="sheet"><h2 class="h3">졸업 후의 길</h2><p class="big">'+o.h+'</p><p class="big-s">'+o.s+'</p>'
     +'<p class="muted">희망 분야: '+F[g].n+(S.flags.changed?' (2학년 때 방향을 바꿨다)':'')+'</p></section>'
@@ -1875,7 +1884,7 @@ const layerHtml={};
 function setLayer(id,h){if(layerHtml[id]===h)return;layerHtml[id]=h;const el=document.getElementById(id);if(el)el.innerHTML=h;}
 function layers(){
   if(UI.screen==='title'||!S||UI.screen==='char')return{bg:'gate:spring'};
-  if(S.phase==='ending')return{bg:'hall:졸업식',actor:chara(S.ch,{ex:'happy'})};
+  if(S.phase==='ending')return{bg:'hall:ASGS 졸업식',actor:chara(S.ch,{ex:'happy'})};
   return{bg:sceneKey(),actor:chara(S.ch,{ex:mood()})};
 }
 function render(top){
